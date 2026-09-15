@@ -58,93 +58,94 @@
   }
 
   // Seleção de texto estilo marca-texto (adaptado do Lidera360).
-  // A ::selection nativa fica transparente (html.ink-selection no CSS) e
-  // este bloco desenha, por cima, um traço laranja em cada linha
-  // selecionada: espera um instante depois de soltar o mouse e aí o traço
-  // corre da esquerda pra direita (scaleX 0 → 1), linha por linha.
+  // A ::selection nativa fica transparente (html.ink-selection no CSS) e o
+  // traço é um ::highlight (CSS Custom Highlight API): o navegador pinta o
+  // fundo ATRÁS das letras, igual à seleção normal — o texto nunca some e o
+  // destaque acompanha o texto ao rolar, sem recalcular posição.
+  // Animação: um instante depois de soltar o mouse, o destaque cresce da
+  // primeira à última letra selecionada numa varrida rápida.
   // Lê a seleção REAL do navegador, então Ctrl+C continua normal.
-  // Com "reduzir movimento" nada disso liga e fica a seleção laranja comum.
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    const PAINT_DELAY = 40;     // atraso proposital antes do traço aparecer
-    const STROKE_STAGGER = 25;  // atraso entre linhas quando a seleção quebra
+  // Sem suporte à API ou com "reduzir movimento", fica a seleção laranja comum.
+  // (A versão anterior desenhava retângulos POR CIMA do texto e dependia de
+  // mix-blend-mode pra deixar as letras aparecerem; quando o blend não era
+  // aplicado, o traço cobria o texto.)
+  if ('highlights' in CSS && typeof Highlight === 'function' &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    const PAINT_DELAY = 40;         // atraso proposital antes do traço aparecer
+    const SWEEP_MS = 320;           // duração da varrida da 1ª à última letra
+    const ON_ORANGE = '.cta-final'; // fundo laranja usa outro tom (ver CSS)
 
     document.documentElement.classList.add('ink-selection');
 
-    // O traço fica POR CIMA do texto, então precisa se misturar com a
-    // página em vez de cobrir as letras:
-    //  · fundo escuro (quase o site todo): "screen" só clareia — o fundo
-    //    vira laranja e as letras claras continuam claras
-    //  · fundo laranja (.cta-final): "screen" deixaria o texto preto
-    //    laranja e ele sumiria; lá usa "multiply" com um tom escuro, que
-    //    escurece o fundo e mantém o texto preto
-    // O blend precisa estar na CAMADA (ela é fixed + z-index, isola os
-    // filhos), por isso são duas camadas, uma por modo.
-    // Ficam acima do conteúdo e abaixo do header (z-index 100).
-    const makeLayer = (blend, ink) => {
-      const layer = document.createElement('div');
-      layer.setAttribute('aria-hidden', 'true');
-      layer.style.cssText = `position:fixed; inset:0; pointer-events:none; z-index:50; mix-blend-mode:${blend};`;
-      document.body.appendChild(layer);
-      return { layer, ink };
-    };
-    const onDark = makeLayer('screen', 'rgba(255,122,26,0.75)');
-    const onOrange = makeLayer('multiply', 'rgba(14,13,12,0.3)');
-    // tema claro (creme): texto escuro em fundo claro — "multiply" com
-    // laranja pinta o fundo e mantém as letras escuras (mesma camada)
-    const onCream = { layer: onOrange.layer, ink: 'rgba(255,122,26,0.5)' };
-    const LIGHT_BG = '.cta-final';
+    const inkHL = new Highlight();
+    const inkOnOrangeHL = new Highlight();
+    CSS.highlights.set('ink', inkHL);
+    CSS.highlights.set('ink-on-orange', inkOnOrangeHL);
 
-    let strokes = [];
     let paintTimer = null;
+    let sweepRaf = null;
     let pointerDown = false;
 
-    const clearStrokes = () => {
-      strokes.forEach(s => s.remove());
-      strokes = [];
+    const clearInk = () => {
+      if (sweepRaf !== null){ cancelAnimationFrame(sweepRaf); sweepRaf = null; }
+      inkHL.clear();
+      inkOnOrangeHL.clear();
     };
 
-    // getClientRects devolve também a caixa inteira dos elementos que a
-    // seleção atravessa (um <p> todo, um card...) — descarta qualquer
-    // retângulo que contenha outro, pra sobrar só as linhas de texto
-    const lineRects = range => {
-      const rects = Array.from(range.getClientRects())
-        .filter(r => r.width > 2 && r.height > 2)
-        .slice(0, 300);
-      return rects.filter((r, i) => !rects.some((o, j) => j !== i &&
-        o.left >= r.left - 1 && o.right <= r.right + 1 &&
-        o.top >= r.top - 1 && o.bottom <= r.bottom + 1 &&
-        (o.width < r.width - 1 || o.height < r.height - 1)));
+    // quebra a seleção em pedaços, um por nó de texto, marcando os que
+    // estão em fundo laranja
+    const textPieces = range => {
+      const pieces = [];
+      const root = range.commonAncestorContainer;
+      const walker = document.createTreeWalker(
+        root.nodeType === Node.TEXT_NODE ? root.parentNode : root,
+        NodeFilter.SHOW_TEXT
+      );
+      for (let node = walker.nextNode(); node; node = walker.nextNode()){
+        if (!range.intersectsNode(node)) continue;
+        const start = node === range.startContainer ? range.startOffset : 0;
+        const end = node === range.endContainer ? range.endOffset : node.length;
+        if (end <= start || !node.data.slice(start, end).trim()) continue;
+        const el = node.parentElement;
+        pieces.push({ node, start, end, onOrange: !!(el && el.closest(ON_ORANGE)) });
+      }
+      return pieces;
     };
 
-    const paintSelection = (animate = true) => {
-      clearStrokes();
+    // destaca só as primeiras `count` letras da seleção
+    const renderInk = (pieces, count) => {
+      inkHL.clear();
+      inkOnOrangeHL.clear();
+      let left = count;
+      for (const p of pieces){
+        if (left <= 0) break;
+        const len = Math.min(p.end - p.start, left);
+        const r = document.createRange();
+        r.setStart(p.node, p.start);
+        r.setEnd(p.node, p.start + len);
+        (p.onOrange ? inkOnOrangeHL : inkHL).add(r);
+        left -= len;
+      }
+    };
+
+    const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+    const paintSelection = () => {
+      clearInk();
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed || sel.rangeCount === 0) return;
+      const pieces = textPieces(sel.getRangeAt(0));
+      const total = pieces.reduce((n, p) => n + (p.end - p.start), 0);
+      if (!total) return;
 
-      lineRects(sel.getRangeAt(0)).forEach((r, i) => {
-        // descobre o fundo embaixo da linha (as camadas ignoram o ponteiro,
-        // então elementFromPoint devolve o conteúdo de verdade)
-        const under = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-        const lightTheme = document.documentElement.classList.contains('theme-light');
-        const target = under && under.closest(LIGHT_BG) ? onOrange : (lightTheme ? onCream : onDark);
-        const stroke = document.createElement('span');
-        stroke.style.cssText = `
-          position:fixed;
-          left:${r.left}px; top:${r.top}px;
-          width:${r.width}px; height:${r.height}px;
-          background:${target.ink};
-          border-radius:2px;
-          transform-origin:left center;
-          transform:scaleX(${animate ? 0 : 1});
-          transition:${animate ? 'transform 0.3s cubic-bezier(.16,1,.3,1)' : 'none'};
-          transition-delay:${i * STROKE_STAGGER}ms;
-        `;
-        target.layer.appendChild(stroke);
-        strokes.push(stroke);
-      });
-
-      // espera um frame pra o navegador registrar o scaleX(0) antes de animar
-      if (animate) requestAnimationFrame(() => strokes.forEach(s => { s.style.transform = 'scaleX(1)'; }));
+      let t0 = null;
+      const tick = ts => {
+        if (t0 === null) t0 = ts;
+        const t = Math.min((ts - t0) / SWEEP_MS, 1);
+        renderInk(pieces, Math.ceil(total * easeOutCubic(t)));
+        sweepRaf = t < 1 ? requestAnimationFrame(tick) : null;
+      };
+      sweepRaf = requestAnimationFrame(tick);
     };
 
     const schedulePaint = () => {
@@ -162,22 +163,11 @@
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed){
         clearTimeout(paintTimer);
-        clearStrokes();
+        clearInk();
         return;
       }
       if (!pointerDown) schedulePaint();
     });
-
-    // os traços usam coordenadas da tela: ao rolar/redimensionar,
-    // redesenha na posição nova, sem animar de novo
-    let repaintQueued = false;
-    const repaint = () => {
-      if (repaintQueued || !strokes.length) return;
-      repaintQueued = true;
-      requestAnimationFrame(() => { repaintQueued = false; paintSelection(false); });
-    };
-    window.addEventListener('scroll', repaint, { passive: true, capture: true });
-    window.addEventListener('resize', repaint);
   }
 
   // Fundo "aurora" da hero — versão em WebGL puro do componente Aurora

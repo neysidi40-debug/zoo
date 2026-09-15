@@ -24,6 +24,11 @@
     --float-shadow-hover: 0 10px 30px rgba(0,0,0,0.5);
     --aurora-opacity: 0.18;
     --section-shadow: 0 -10px 22px -12px rgba(0,0,0,0.75);
+    /* logo da hero: opacidade final e filtro. O filtro é a sombra interna
+       discreta em laranja bem escuro (SVG #logo-inner-shadow no começo do
+       <body>); dá pra somar outros depois, ex.: url(#logo-inner-shadow) saturate(1.2) */
+    --hero-logo-opacity: 0.7;
+    --hero-logo-filter: url(#logo-inner-shadow);
     color-scheme: dark;
   }
 
@@ -51,7 +56,11 @@
     --float-shadow: 0 0 0 3px rgba(228,83,27,0.08), 0 8px 24px rgba(60,42,24,0.22);
     --float-shadow-hover: 0 0 0 3px rgba(228,83,27,0.12), 0 10px 28px rgba(60,42,24,0.28);
     --aurora-opacity: 0.12;
-    --section-shadow: 0 -10px 22px -12px rgba(60,42,24,0.22);
+    /* no claro, a divisória entre seções vira uma linha laranja de 1px
+       (a sombra deslocada 1px pra cima cobre a borda cinza que já existe
+       no mesmo lugar) + um brilho laranja bem fraco */
+    --section-shadow: 0 -1px 0 0 var(--orange), 0 -10px 22px -12px rgba(228,83,27,0.28);
+    --hero-logo-opacity: 0.55;
     color-scheme: light;
   }
   /* transição curta de cores só durante a troca de tema (a classe fica
@@ -88,6 +97,18 @@
     background:transparent;
     color:inherit;
   }
+  /* o "traço" da seleção é um ::highlight (CSS Custom Highlight API):
+     pinta ATRÁS das letras, igual à seleção nativa, então o texto nunca
+     some. Só muda o fundo — a cor do texto continua a original, por isso
+     os tons foram escolhidos pra dar contraste com ela em cada caso */
+  ::highlight(ink){ background-color:#C2490F; }            /* texto claro no escuro */
+  html.theme-light ::highlight(ink){ background-color:#F6B48A; } /* texto escuro no creme */
+  ::highlight(ink-on-orange){ background-color:rgba(14,13,12,0.22); } /* faixa laranja (.cta-final) */
+
+  /* tema claro: nesses dois lugares a borda cinza fica logo abaixo da
+     nova linha laranja da divisória e viraria linha dupla */
+  html.theme-light .trust-bar,
+  html.theme-light .projects{ border-top-color:transparent; }
   @media (prefers-reduced-motion: reduce){
     html{ scroll-behavior:auto; }
     *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
@@ -381,6 +402,55 @@
     display:block;
   }
   .hero .marquee-wrap{ position:relative; }
+
+  /* ---------- LOGO AO LADO DO CONTEÚDO DA HERO ----------
+     Mesmo esquema do #header-expandida::before do dharlan.world: uma
+     imagem decorativa num ::before (sem clique), meio transparente e
+     flutuando devagar em loop (fragment-float: 5px e meio grau pra lá e
+     pra cá, a cada 8s). Aqui ela também entra com um fade depois que o
+     título termina de surgir.
+     Fica no .wrap da hero (não na hero inteira), centralizada na vertical
+     com o bloco de conteúdo — tag, título, texto e botões.
+     Na horizontal (provisório, até o redesign da main): a borda direita
+     VISÍVEL da logo alinha com a borda direita do botão "Iniciar projeto"
+     da nav — o mais longe possível do título, que às vezes digita
+     palavras longas.
+     A zoo.png (612×408) tem margem transparente — 15,52% à direita, e o
+     desenho fica 3,31% acima do centro da imagem —, então a conta desconta
+     essa margem pra alinhar o que aparece, não a caixa:
+       right = padding do .wrap (32px, mesma borda do botão)
+               − margem direita transparente (15,52% da largura da logo)
+     O translateY da centralização vai junto dentro da animação, senão a
+     flutuação o apagaria. */
+  .hero > .wrap::before{
+    /* menor que antes pra sobrar espaço mesmo quando o título digita a
+       palavra mais longa do ciclo ("encantar") */
+    --logo-w:clamp(280px, 26vw, 360px);
+    content:"";
+    position:absolute;
+    top:50%;
+    right:calc(32px - var(--logo-w) * 0.1552);
+    width:var(--logo-w);
+    aspect-ratio:612 / 408;
+    background:url("zoo.png") center / contain no-repeat;
+    filter:var(--hero-logo-filter);
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(-46.7%); /* -50% + 3,31%: centraliza o desenho, não a caixa */
+    transform-origin:center;
+    animation:
+      hero-logo-in 1s ease 0.8s forwards,
+      fragment-float 8s ease-in-out 1.8s infinite;
+  }
+  @keyframes hero-logo-in{ to{ opacity:var(--hero-logo-opacity); } }
+  @keyframes fragment-float{
+    0%, 100%{ transform:translateY(-46.7%) translate(0, 0) rotate(0deg); }
+    50%     { transform:translateY(-46.7%) translate(5px, -5px) rotate(0.5deg); }
+  }
+  /* tablet/celular: não sobra espaço ao lado do texto — esconde */
+  @media (max-width: 1023px){
+    .hero > .wrap::before{ display:none; }
+  }
   .hero-tag{
     display:flex;
     align-items:center;
@@ -468,12 +538,12 @@
     border-top:1px solid var(--line);
     border-bottom:1px solid var(--line);
     padding:18px 0;
-    overflow:hidden;
     white-space:nowrap;
   }
+  /* sem animação automática: o letreiro só anda quando a pessoa arrasta
+     (.drag-scroll + data-loop, ver carousel.js) */
   .marquee{
     display:inline-flex;
-    animation:scroll 26s linear infinite;
   }
   .marquee span{
     font-family:'Big Shoulders Display', sans-serif;
@@ -489,7 +559,21 @@
     content:"—";
     color:var(--orange);
   }
-  @keyframes scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+  /* faixas arrastáveis (carousel.js): rolam na horizontal só quando a
+     pessoa puxa; barra de rolagem escondida */
+  .drag-scroll{
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+    overscroll-behavior-x:contain;
+    cursor:grab;
+  }
+  .drag-scroll::-webkit-scrollbar{ display:none; }
+  .drag-scroll.is-dragging{
+    cursor:grabbing;
+    user-select:none;
+    scroll-snap-type:none;
+  }
 
   /* ---------- SECTION HEAD ---------- */
   section{ position:relative; padding:110px 0; }
@@ -568,6 +652,149 @@
     margin-top:6px;
     background:var(--orange);
     flex-shrink:0;
+  }
+
+  /* ---------- CARROSSEL DE PROJETOS (dentro de SERVICES) ----------
+     minimalista: um slide por vez, colados, sem espaço nem borda entre
+     eles — só um contorno fino em volta do bloco. Legenda por cima da
+     base da imagem e setas < > dentro do próprio carrossel */
+  .work-carousel{
+    position:relative;
+    max-width:640px;
+    margin:56px auto 0;
+    border:1px solid var(--line);
+    /* sem overflow:hidden (a faixa já corta os slides): o traço da borda
+       (::before) passa 1px pra fora e seria cortado */
+  }
+  .carousel-track{
+    position:relative; /* offsetLeft dos slides relativo à faixa */
+    display:flex;
+    scroll-snap-type:x mandatory;
+  }
+  .carousel-track:focus-visible{ outline:2px solid var(--orange); outline-offset:-2px; }
+  .carousel-slide{
+    position:relative;
+    flex:0 0 100%;
+    margin:0;
+    scroll-snap-align:start;
+  }
+  .carousel-slide img,
+  .carousel-slide video{
+    display:block;
+    width:100%;
+    aspect-ratio:16 / 10;
+    object-fit:cover;
+    pointer-events:none;
+    user-select:none;
+  }
+  /* legenda sobre a imagem: cores fixas (não seguem o tema) porque o
+     fundo é sempre a foto escurecida pelo degradê */
+  .carousel-slide figcaption{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:12px;
+    padding:36px 18px 14px;
+    background:linear-gradient(transparent, rgba(14,13,12,0.78));
+    font-size:15px;
+    font-weight:600;
+    color:#F2EFE9;
+  }
+
+  /* setas < >: bem apagadas por padrão; no hover acendem e "esticam"
+     uma vez na direção em que andam, com glow laranja */
+  .carousel-btn{
+    position:absolute;
+    top:0; bottom:0;
+    margin:auto 0;
+    width:52px; height:72px;
+    padding:0;
+    border:0;
+    background:transparent;
+    color:var(--orange);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0.55;
+    cursor:pointer;
+    z-index:2;
+    transition:opacity 0.25s ease;
+  }
+  .carousel-btn--prev{ left:4px; }
+  .carousel-btn--next{ right:4px; }
+  .carousel-btn svg{
+    width:30px; height:30px;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+    transition:filter 0.25s ease;
+  }
+  /* estica pra fora: a seta de voltar cresce pra esquerda, a de avançar pra direita */
+  .carousel-btn--prev svg{ transform-origin:right center; }
+  .carousel-btn--next svg{ transform-origin:left center; }
+  .carousel-btn:hover:not(:disabled),
+  .carousel-btn:focus-visible{ opacity:1; }
+  .carousel-btn:hover:not(:disabled) svg,
+  .carousel-btn:focus-visible svg{
+    animation:arrow-stretch 0.5s cubic-bezier(.2,.7,.3,1) 1;
+    filter:drop-shadow(0 0 6px rgba(255,90,31,0.9)) drop-shadow(0 0 14px rgba(255,90,31,0.45));
+  }
+  @keyframes arrow-stretch{
+    0%  { transform:scaleX(1); }
+    40% { transform:scaleX(1.5); }
+    100%{ transform:scaleX(1); }
+  }
+  .carousel-btn:disabled{ opacity:0.08; cursor:default; }
+
+  /* quando o carrossel aparece (e o vídeo carrega), as setas fazem a
+     animação do hover UMA vez, pra mostrar que dá pra passar — a classe
+     .is-hinting fica ~0,9s no .work-carousel (carousel.js). A seta de
+     avançar entra um tiquinho depois da de voltar */
+  .work-carousel.is-hinting .carousel-btn:not(:disabled){ opacity:1; }
+  .work-carousel.is-hinting .carousel-btn:not(:disabled) svg{
+    animation:arrow-stretch 0.5s cubic-bezier(.2,.7,.3,1) 1;
+    filter:drop-shadow(0 0 6px rgba(255,90,31,0.9)) drop-shadow(0 0 14px rgba(255,90,31,0.45));
+  }
+  .work-carousel.is-hinting .carousel-btn--next svg{ animation-delay:0.12s; }
+
+  /* borda que acende UMA vez, no mesmo momento da dica das setas —
+     adaptado do player de vídeo do Lidera360, em laranja, só com o traço
+     (sem o brilho de fundo). Ligado pela classe .is-pulsing (carousel.js),
+     que sai quando o traço termina.
+     O traço é um anel: duas máscaras (content-box e border-box) subtraídas
+     deixam só os 2px de padding das beiradas; o que anda é o
+     background-position de uma faixa diagonal. */
+  .work-carousel::before{
+    content:"";
+    position:absolute;
+    inset:-1px; /* cobre a borda de 1px */
+    padding:2px; /* espessura do traço */
+    z-index:3;
+    pointer-events:none;
+    background:linear-gradient(115deg,
+      rgba(255,90,31,0)   36%,
+      rgba(255,90,31,0.7) 45%,
+      #FFD9C4             50%,
+      rgba(255,90,31,0.7) 55%,
+      rgba(255,90,31,0)   64%);
+    background-size:260% 100%;
+    background-repeat:no-repeat;
+    background-position:140% 0;
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite:exclude;
+    opacity:0;
+  }
+  @keyframes carousel-edge-sweep{
+    0%  { opacity:0; background-position:140% 0; }
+    8%  { opacity:1; }
+    88% { opacity:1; }
+    100%{ opacity:0; background-position:-40% 0; }
+  }
+  .work-carousel.is-pulsing::before{ animation:carousel-edge-sweep 1.4s cubic-bezier(.4,0,.2,1) 1; }
+  @media (prefers-reduced-motion: reduce){
+    .work-carousel.is-pulsing::before{ animation:none; }
   }
 
   /* ---------- PROCESS ---------- */

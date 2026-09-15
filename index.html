@@ -44,6 +44,27 @@
 
 <a class="skip-link" href="#top">Pular para o conteúdo</a>
 
+<!-- filtro da sombra interna da logo da hero (usado no style.css via
+     --hero-logo-filter). Segue o formato da PNG pelo canal alfa: inverte o
+     alfa, borra, desloca 2px pra baixo, recorta de volta pra dentro da logo
+     e pinta de laranja bem escuro por cima da imagem. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="logo-inner-shadow" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+    <feComponentTransfer in="SourceAlpha" result="inverse">
+      <feFuncA type="table" tableValues="1 0"/>
+    </feComponentTransfer>
+    <feGaussianBlur in="inverse" stdDeviation="3" result="blur"/>
+    <feOffset in="blur" dx="0" dy="2" result="offset"/>
+    <feComposite in="offset" in2="SourceAlpha" operator="in" result="shadowShape"/>
+    <feFlood flood-color="#6E2406" flood-opacity="0.55"/>
+    <feComposite in2="shadowShape" operator="in" result="shadow"/>
+    <feMerge>
+      <feMergeNode in="SourceGraphic"/>
+      <feMergeNode in="shadow"/>
+    </feMerge>
+  </filter>
+</svg>
+
 <header>
   <div class="wrap nav">
     <a class="logo" href="#top">
@@ -102,9 +123,9 @@
         <span class="mono">ESTÚDIO DE SITES — RECIFE, PE</span>
       </div>
       <h1>
-        <span>Sites que</span>
-        <span class="l2">vendem, não</span>
-        <span class="l3">só <span class="typed-word" data-words="existem|enfeitam|aparecem|carregam|custam" aria-hidden="true">existem</span><span class="sr-only">existem</span>.</span>
+        <span>Bonitos de ver,</span>
+        <span class="l2">fáceis de usar,</span>
+        <span class="l3">feitos pra <span class="typed-word" data-words="crescer|vender|durar|encantar" aria-hidden="true">crescer</span><span class="sr-only">crescer</span>.</span>
       </h1>
       <p class="lede">Projetamos e construímos o site do seu negócio do zero — estrutura, design e conteúdo pensados para <mark class="ink">transformar visita em cliente</mark>, não apenas para ficar bonito parado.</p>
       <div class="hero-actions">
@@ -113,7 +134,7 @@
       </div>
     </div>
 
-    <div class="marquee-wrap">
+    <div class="marquee-wrap drag-scroll" data-loop>
       <div class="marquee">
         <span>RESTAURANTES</span><span>LOJAS</span><span>CLÍNICAS</span><span>ESCRITÓRIOS</span><span>OFICINAS</span><span>ESTÚDIOS</span><span>PRESTADORES DE SERVIÇO</span>
         <span>RESTAURANTES</span><span>LOJAS</span><span>CLÍNICAS</span><span>ESCRITÓRIOS</span><span>OFICINAS</span><span>ESTÚDIOS</span><span>PRESTADORES DE SERVIÇO</span>
@@ -186,6 +207,44 @@
             <li>Suporte para evoluir com o tempo</li>
           </ul>
         </div>
+      </div>
+
+      <!-- carrossel de projetos (arrastável, ver carousel.js) — imagens provisórias -->
+      <div class="work-carousel reveal">
+        <div class="carousel-track drag-scroll" id="workCarousel" data-snap tabindex="0" aria-label="Projetos que já fizemos">
+          <figure class="carousel-slide">
+            <!-- vídeo toca sozinho (mudo) quando o carrossel aparece na tela — ver carousel.js -->
+            <video src="projeto1.mp4" muted loop playsinline preload="metadata" aria-label="Vídeo do Projeto 1"></video>
+            <figcaption><span>Projeto 1</span><span class="mono">DESTAQUE</span></figcaption>
+          </figure>
+          <figure class="carousel-slide">
+            <img src="https://picsum.photos/seed/zoo-autopecas/960/600" alt="Prévia da loja da Auto Peças Bravo" loading="lazy" draggable="false">
+            <figcaption><span>Auto Peças Bravo</span><span class="mono">LOJA VIRTUAL</span></figcaption>
+          </figure>
+          <figure class="carousel-slide">
+            <img src="https://picsum.photos/seed/zoo-clinica/960/600" alt="Prévia do sistema da Clínica Vitalis" loading="lazy" draggable="false">
+            <figcaption><span>Clínica Vitalis</span><span class="mono">SISTEMA</span></figcaption>
+          </figure>
+          <figure class="carousel-slide">
+            <img src="https://picsum.photos/seed/zoo-lente/960/600" alt="Prévia do portfólio do Estúdio Lente" loading="lazy" draggable="false">
+            <figcaption><span>Estúdio Lente</span><span class="mono">PORTFÓLIO</span></figcaption>
+          </figure>
+          <figure class="carousel-slide">
+            <img src="https://picsum.photos/seed/zoo-plantas/960/600" alt="Prévia da loja da Casa Verde Plantas" loading="lazy" draggable="false">
+            <figcaption><span>Casa Verde Plantas</span><span class="mono">LOJA VIRTUAL</span></figcaption>
+          </figure>
+          <figure class="carousel-slide">
+            <img src="https://picsum.photos/seed/zoo-oficina/960/600" alt="Prévia do sistema da Oficina Torque" loading="lazy" draggable="false">
+            <figcaption><span>Oficina Torque</span><span class="mono">SISTEMA</span></figcaption>
+          </figure>
+        </div>
+        <!-- setas dentro do carrossel: bem apagadas, acendem e esticam no hover -->
+        <button type="button" class="carousel-btn carousel-btn--prev" data-carousel-prev aria-controls="workCarousel" aria-label="Projeto anterior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6" vector-effect="non-scaling-stroke"/></svg>
+        </button>
+        <button type="button" class="carousel-btn carousel-btn--next" data-carousel-next aria-controls="workCarousel" aria-label="Próximo projeto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18" vector-effect="non-scaling-stroke"/></svg>
+        </button>
       </div>
     </div>
   </section>
@@ -536,5 +595,6 @@
 <script src="headerScroll.js"></script>
 <script src="typing.js"></script>
 <script src="themeSwitch.js"></script>
+<script src="carousel.js"></script>
 </body>
 </html>
