@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <!--
   ZOO — Site institucional (portfólio da empresa)
   ============================================================
@@ -10,14 +11,14 @@
   O que ainda precisa de informação real antes de publicar:
     - Número de WhatsApp (hoje é um placeholder: 5581900000000)
     - CNPJ e endereço no rodapé (hoje estão com valores fictícios)
+    - Preços da seção PRICING (hoje são valores ilustrativos)
     - Os 6 projetos e os 3 depoimentos são exemplos — trocar pelos
       clientes reais assim que a carteira tiver casos pra mostrar
 
   Cada seção do site tem um comentário indicando onde ela começa
-  (ex: <!-- HERO -->), na mesma ordem em que aparece na página.
+  (ex: o comentário "HERO"), na mesma ordem em que aparece na página.
   ============================================================
 -->
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -33,6 +34,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script>
+  // aplica o tema salvo antes de a página pintar, pra não piscar escuro→claro
+  // (a bolinha que troca o tema fica no themeSwitch.js)
+  try { if (localStorage.getItem('zoo-theme') === 'light') document.documentElement.classList.add('theme-light'); } catch (e) {}
+</script>
 </head>
 <body>
 
@@ -45,9 +51,9 @@
         <circle cx="20" cy="20" r="15" fill="var(--orange)"/>
         <circle cx="80" cy="20" r="15" fill="var(--orange)"/>
         <circle cx="50" cy="56" r="36" fill="var(--orange)"/>
-        <circle cx="37" cy="50" r="5.5" fill="var(--black)"/>
-        <circle cx="63" cy="50" r="5.5" fill="var(--black)"/>
-        <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--black)"/>
+        <circle cx="37" cy="50" r="5.5" fill="var(--on-orange)"/>
+        <circle cx="63" cy="50" r="5.5" fill="var(--on-orange)"/>
+        <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--on-orange)"/>
       </svg>
       ZOO
     </a>
@@ -55,6 +61,7 @@
       <a href="#servicos">Serviços</a>
       <a href="#processo">Processo</a>
       <a href="#projetos">Projetos</a>
+      <a href="#precos">Preços</a>
       <a href="#contato">Contato</a>
     </nav>
     <a class="btn btn-solid nav-cta" href="#contato">Iniciar projeto</a>
@@ -62,10 +69,22 @@
       <span></span><span></span><span></span>
     </button>
   </div>
+  <!-- bolinha do header compacto (desktop) — ver headerScroll.js -->
+  <button class="nav-bubble" type="button" aria-label="Voltar ao topo">
+    <svg width="32" height="32" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+      <circle cx="20" cy="20" r="15" fill="var(--orange)"/>
+      <circle cx="80" cy="20" r="15" fill="var(--orange)"/>
+      <circle cx="50" cy="56" r="36" fill="var(--orange)"/>
+      <circle cx="37" cy="50" r="5.5" fill="var(--on-orange)"/>
+      <circle cx="63" cy="50" r="5.5" fill="var(--on-orange)"/>
+      <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--on-orange)"/>
+    </svg>
+  </button>
   <nav class="mobile-nav" id="mobileNav" aria-label="Navegação mobile">
     <a href="#servicos">Serviços</a>
     <a href="#processo">Processo</a>
     <a href="#projetos">Projetos</a>
+    <a href="#precos">Preços</a>
     <a href="#contato">Contato</a>
     <a class="btn btn-solid" href="#contato">Iniciar projeto</a>
   </nav>
@@ -75,6 +94,7 @@
 
   <!-- HERO -->
   <section class="hero">
+    <canvas class="hero-aurora" id="heroAurora" aria-hidden="true"></canvas>
     <div class="grid-bg"></div>
     <div class="wrap" style="position:relative;">
       <div class="hero-tag">
@@ -84,9 +104,9 @@
       <h1>
         <span>Sites que</span>
         <span class="l2">vendem, não</span>
-        <span class="l3">só existem.</span>
+        <span class="l3">só <span class="typed-word" data-words="existem|enfeitam|aparecem|carregam|custam" aria-hidden="true">existem</span><span class="sr-only">existem</span>.</span>
       </h1>
-      <p class="lede">Projetamos e construímos o site do seu negócio do zero — estrutura, design e conteúdo pensados para transformar visita em cliente, não apenas para ficar bonito parado.</p>
+      <p class="lede">Projetamos e construímos o site do seu negócio do zero — estrutura, design e conteúdo pensados para <mark class="ink">transformar visita em cliente</mark>, não apenas para ficar bonito parado.</p>
       <div class="hero-actions">
         <a class="btn btn-solid" href="#contato">Pedir orçamento</a>
         <a class="btn" href="#projetos">Ver projetos</a>
@@ -105,19 +125,19 @@
   <section style="padding:0;">
     <div class="trust-bar stagger">
       <div class="trust-item reveal">
-        <div class="figure">40+</div>
+        <div class="figure" data-count="40" data-suffix="+">40+</div>
         <div class="label">sites entregues</div>
       </div>
       <div class="trust-item reveal">
-        <div class="figure">4</div>
+        <div class="figure" data-count="4">4</div>
         <div class="label">anos de estúdio</div>
       </div>
       <div class="trust-item reveal">
-        <div class="figure">21 dias</div>
+        <div class="figure" data-count="21" data-suffix=" dias">21 dias</div>
         <div class="label">prazo médio de entrega</div>
       </div>
       <div class="trust-item reveal">
-        <div class="figure">30 dias</div>
+        <div class="figure" data-count="30" data-suffix=" dias">30 dias</div>
         <div class="label">de suporte pós-lançamento</div>
       </div>
     </div>
@@ -128,7 +148,7 @@
     <div class="wrap">
       <div class="sec-head reveal">
         <h2>O que a gente<br>constrói</h2>
-        <p class="note">Três formatos de base. Todos ajustados sob medida para o seu negócio — nada de template genérico com sua logo em cima.</p>
+        <p class="note">Três formatos de base. Todos ajustados sob medida para o seu negócio — <mark class="ink">nada de template genérico</mark> com sua logo em cima.</p>
       </div>
     </div>
     <div class="wrap" style="padding:0 32px 0;">
@@ -140,14 +160,14 @@
           <ul class="spec-list">
             <li>Até 6 páginas (Home, Sobre, Serviços, Contato...)</li>
             <li>Formulário de contato direto</li>
-            <li>Otimizado para aparecer no Google</li>
+            <li><mark class="ink">Otimizado para aparecer no Google</mark></li>
             <li>Painel simples para você atualizar os textos</li>
           </ul>
         </div>
         <div class="service-card reveal">
           <span class="num mono">FICHA 02</span>
           <h3>Loja virtual</h3>
-          <p>Catálogo de produtos, carrinho e pagamento — para vender direto pelo site, sem depender apenas de rede social.</p>
+          <p>Catálogo de produtos, carrinho e pagamento — para <mark class="ink">vender direto pelo site</mark>, sem depender apenas de rede social.</p>
           <ul class="spec-list">
             <li>Catálogo com fotos e variações</li>
             <li>Carrinho e checkout com Pix/cartão</li>
@@ -158,7 +178,7 @@
         <div class="service-card reveal">
           <span class="num mono">FICHA 03</span>
           <h3>Sistema sob medida</h3>
-          <p>Quando um site pronto não resolve: painel de agendamento, área de cliente, cadastros e regras próprias do seu negócio.</p>
+          <p>Quando um site pronto não resolve: painel de agendamento, área de cliente, cadastros e <mark class="ink">regras próprias do seu negócio</mark>.</p>
           <ul class="spec-list">
             <li>Levantamento do fluxo do seu negócio</li>
             <li>Login e área restrita quando precisar</li>
@@ -175,7 +195,7 @@
     <div class="wrap">
       <div class="sec-head reveal">
         <h2>Como o projeto<br>anda</h2>
-        <p class="note">Quatro etapas, sempre com você acompanhando — sem sumiço e sem surpresa na entrega.</p>
+        <p class="note">Quatro etapas, sempre com você acompanhando — <mark class="ink">sem sumiço e sem surpresa na entrega</mark>.</p>
       </div>
       <div class="process-line stagger">
         <div class="step reveal">
@@ -186,7 +206,7 @@
         <div class="step reveal">
           <div class="step-marker">02</div>
           <h3>Design</h3>
-          <p>Layout e identidade visual próprios, aprovados com você antes de programar.</p>
+          <p>Layout e identidade visual próprios, <mark class="ink">aprovados com você antes de programar</mark>.</p>
         </div>
         <div class="step reveal">
           <div class="step-marker">03</div>
@@ -221,7 +241,7 @@
           <div class="project-info">
             <span class="cat">SITE INSTITUCIONAL</span>
             <h3>Padaria Central</h3>
-            <p>Cardápio, horários e localização — com pedidos encaminhados direto para o WhatsApp da loja.</p>
+            <p>Cardápio, horários e localização — com pedidos encaminhados <mark class="ink">direto para o WhatsApp da loja</mark>.</p>
           </div>
         </div>
 
@@ -234,7 +254,7 @@
           <div class="project-info">
             <span class="cat">LOJA VIRTUAL</span>
             <h3>Auto Peças Bravo</h3>
-            <p>Catálogo com busca por veículo e checkout com Pix — pedidos que antes eram só por telefone.</p>
+            <p>Catálogo com busca por veículo e <mark class="ink">checkout com Pix</mark> — pedidos que antes eram só por telefone.</p>
           </div>
         </div>
 
@@ -247,7 +267,7 @@
           <div class="project-info">
             <span class="cat">SISTEMA SOB MEDIDA</span>
             <h3>Clínica Vitalis</h3>
-            <p>Agenda online com confirmação automática, reduzindo faltas e ligações para remarcar horário.</p>
+            <p>Agenda online com confirmação automática, <mark class="ink">reduzindo faltas</mark> e ligações para remarcar horário.</p>
           </div>
         </div>
 
@@ -294,6 +314,88 @@
     </div>
   </section>
 
+  <!-- PRICING — valores ilustrativos, ajustar antes de publicar -->
+  <section class="pricing" id="precos">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <h2>Quanto<br>investir</h2>
+        <p class="note"><mark class="ink">Preço fechado por projeto</mark>, combinado antes de começar. Sem mensalidade obrigatória — o site é seu.</p>
+      </div>
+
+      <div class="plan-grid stagger">
+        <div class="plan-card reveal">
+          <span class="mono plan-name">01 — Presença</span>
+          <h3>Site institucional</h3>
+          <p class="plan-desc">Pra ser encontrado no Google e passar confiança logo no primeiro clique.</p>
+          <span class="plan-price-from">a partir de</span>
+          <span class="plan-price"><small>R$</small>2.490</span>
+          <ul class="spec-list">
+            <li>Até <span class="uline">6</span> páginas</li>
+            <li>Formulário e botão de <span class="uline">WhatsApp</span></li>
+            <li>SEO básico para o Google</li>
+            <li>Painel para editar os textos</li>
+          </ul>
+          <a class="btn" href="#contato">Pedir orçamento</a>
+        </div>
+
+        <div class="plan-card reveal">
+          <span class="mono plan-name">02 — Vendas</span>
+          <h3>Loja virtual</h3>
+          <p class="plan-desc"><span class="uline">Pra vender direto pelo site, sem depender só de rede social.</span></p>
+          <span class="plan-price-from">a partir de</span>
+          <span class="plan-price"><small>R$</small>4.990</span>
+          <ul class="spec-list">
+            <li>Catálogo com fotos e variações</li>
+            <li><span class="uline">Checkout com Pix e Stripe</span></li>
+            <li>Controle de estoque simples</li>
+            <li><span class="uline">Pedido avisado no WhatsApp</span></li>
+          </ul>
+          <a class="btn" href="#contato">Pedir orçamento</a>
+        </div>
+
+        <!-- plano mais caro: pill desliza entre duas versões no mesmo card (script.js) -->
+        <div class="plan-card plan-card--featured plan-toggle-card reveal">
+          <span class="plan-badge">Mais completo</span>
+          <span class="mono plan-name">03 — Operação</span>
+          <h3>Sistema sob medida</h3>
+          <div class="plan-toggle" role="tablist" aria-label="Versão do sistema">
+            <button type="button" class="plan-toggle-btn is-active" role="tab" id="plan-sys-tab-0" aria-controls="plan-sys-0" aria-selected="true">Essencial</button>
+            <button type="button" class="plan-toggle-btn" role="tab" id="plan-sys-tab-1" aria-controls="plan-sys-1" aria-selected="false" tabindex="-1">Completo</button>
+            <span class="plan-toggle-thumb" aria-hidden="true"></span>
+          </div>
+          <div class="plan-toggle-panes">
+            <div class="plan-toggle-pane is-active" role="tabpanel" id="plan-sys-0" aria-labelledby="plan-sys-tab-0">
+              <p class="plan-desc">Um processo do seu negócio no digital: <span class="uline">agenda, pedidos ou cadastro de clientes</span>.</p>
+              <span class="plan-price-from">a partir de</span>
+              <span class="plan-price"><small>R$</small>8.900</span>
+              <ul class="spec-list">
+                <li>Levantamento do fluxo do negócio</li>
+                <li>1 módulo principal</li>
+                <li><span class="uline">Login e área restrita</span></li>
+                <li>Painel administrativo</li>
+              </ul>
+              <a class="btn btn-solid" href="#contato">Falar sobre o projeto</a>
+            </div>
+            <div class="plan-toggle-pane" role="tabpanel" id="plan-sys-1" aria-labelledby="plan-sys-tab-1" inert>
+              <p class="plan-desc">Vários processos integrados num painel só, pensado pra crescer junto com a empresa.</p>
+              <span class="plan-price-from">a partir de</span>
+              <span class="plan-price"><small>R$</small>14.900</span>
+              <ul class="spec-list">
+                <li>Tudo do Essencial</li>
+                <li>Até 4 módulos integrados</li>
+                <li>Níveis de acesso por equipe</li>
+                <li>Relatórios e avisos por WhatsApp</li>
+              </ul>
+              <a class="btn btn-solid" href="#contato">Falar sobre o projeto</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="plan-note reveal">Todos os planos incluem domínio e hospedagem configurados, site responsivo e 30 dias de suporte. Entrada na aprovação e o restante em etapas.</p>
+    </div>
+  </section>
+
   <!-- TESTIMONIALS -->
   <section class="testimonials">
     <div class="wrap">
@@ -303,21 +405,21 @@
       </div>
       <div class="testimonial-grid stagger">
         <div class="testimonial-card reveal">
-          <blockquote>"Antes eu só recebia pedido por telefone e perdia gente no meio do horário de pico. Com o site, o cliente já manda o pedido pronto pelo WhatsApp."</blockquote>
+          <blockquote>"Antes eu só recebia pedido por telefone e perdia gente no meio do horário de pico. Com o site, <mark class="ink">o cliente já manda o pedido pronto</mark> pelo WhatsApp."</blockquote>
           <div class="testimonial-author">
             <div class="avatar-initials">PC</div>
             <div class="who"><strong>Priscila Castro</strong><span>Padaria Central</span></div>
           </div>
         </div>
         <div class="testimonial-card reveal">
-          <blockquote>"O sistema de agenda cortou pela metade as faltas de paciente. A equipe deixou de perder tempo confirmando horário por telefone."</blockquote>
+          <blockquote>"O sistema de agenda <mark class="ink">cortou pela metade as faltas</mark> de paciente. A equipe deixou de perder tempo confirmando horário por telefone."</blockquote>
           <div class="testimonial-author">
             <div class="avatar-initials">RM</div>
             <div class="who"><strong>Rafael Martins</strong><span>Clínica Vitalis</span></div>
           </div>
         </div>
         <div class="testimonial-card reveal">
-          <blockquote>"Entregaram no prazo que combinamos e continuaram dando suporte depois — coisa rara nesse mercado. Recomendo de olhos fechados."</blockquote>
+          <blockquote>"<mark class="ink">Entregaram no prazo</mark> que combinamos e <mark class="ink">continuaram dando suporte depois</mark> — coisa rara nesse mercado. Recomendo de olhos fechados."</blockquote>
           <div class="testimonial-author">
             <div class="avatar-initials">JB</div>
             <div class="who"><strong>João Bravo</strong><span>Auto Peças Bravo</span></div>
@@ -332,15 +434,15 @@
     <div class="wrap deliverables">
       <div class="reveal">
         <h2>O que vem<br>junto do site</h2>
-        <p>Nenhum projeto sai da nossa mão sem isso — faz parte do preço, não é upgrade escondido no contrato.</p>
+        <p>Nenhum projeto sai da nossa mão sem isso — <mark class="ink">faz parte do preço</mark>, não é upgrade escondido no contrato.</p>
       </div>
       <ul class="check-list stagger">
-        <li class="reveal"><span class="check-box">✓</span> Site responsivo (celular, tablet e computador)</li>
-        <li class="reveal"><span class="check-box">✓</span> Domínio e hospedagem configurados</li>
-        <li class="reveal"><span class="check-box">✓</span> Otimização básica para o Google (SEO)</li>
-        <li class="reveal"><span class="check-box">✓</span> Botão de WhatsApp integrado</li>
-        <li class="reveal"><span class="check-box">✓</span> Treinamento para você mesmo atualizar o site</li>
-        <li class="reveal"><span class="check-box">✓</span> 30 dias de suporte após o lançamento</li>
+        <li class="reveal"><span class="check-box"><svg viewBox="0 0 12 12" aria-hidden="true"><path pathLength="1" d="M2.5 6.2l2.4 2.4 4.6-5"/></svg></span> Site responsivo (celular, tablet e computador)</li>
+        <li class="reveal"><span class="check-box"><svg viewBox="0 0 12 12" aria-hidden="true"><path pathLength="1" d="M2.5 6.2l2.4 2.4 4.6-5"/></svg></span> Domínio e hospedagem configurados</li>
+        <li class="reveal"><span class="check-box"><svg viewBox="0 0 12 12" aria-hidden="true"><path pathLength="1" d="M2.5 6.2l2.4 2.4 4.6-5"/></svg></span> Otimização básica para o Google (SEO)</li>
+        <li class="reveal"><span class="check-box"><svg viewBox="0 0 12 12" aria-hidden="true"><path pathLength="1" d="M2.5 6.2l2.4 2.4 4.6-5"/></svg></span> Botão de WhatsApp integrado</li>
+        <li class="reveal"><span class="check-box"><svg viewBox="0 0 12 12" aria-hidden="true"><path pathLength="1" d="M2.5 6.2l2.4 2.4 4.6-5"/></svg></span> Treinamento para você mesmo atualizar o site</li>
+        <li class="reveal"><span class="check-box"><svg viewBox="0 0 12 12" aria-hidden="true"><path pathLength="1" d="M2.5 6.2l2.4 2.4 4.6-5"/></svg></span> <mark class="ink">30 dias de suporte após o lançamento</mark></li>
       </ul>
     </div>
   </section>
@@ -355,11 +457,11 @@
       <div class="faq-list stagger">
         <div class="faq-item reveal">
           <h3>Quanto tempo leva para ficar pronto?</h3>
-          <p>Em média 21 dias corridos a partir da aprovação do design, dependendo do tamanho do projeto. Sistemas sob medida têm prazo combinado caso a caso, definido no diagnóstico.</p>
+          <p>Em média <mark class="ink">21 dias corridos</mark> a partir da aprovação do design, dependendo do tamanho do projeto. Sistemas sob medida têm prazo combinado caso a caso, definido no diagnóstico.</p>
         </div>
         <div class="faq-item reveal">
           <h3>O site fica no meu nome?</h3>
-          <p>Sim. Domínio, hospedagem e todo o código ficam registrados em seu nome ou CNPJ. Você não fica preso a nós para manter o site no ar.</p>
+          <p>Sim. Domínio, hospedagem e todo o código ficam registrados <mark class="ink">em seu nome ou CNPJ</mark>. <mark class="ink">Você não fica preso a nós</mark> para manter o site no ar.</p>
         </div>
         <div class="faq-item reveal">
           <h3>Como funciona o pagamento?</h3>
@@ -367,11 +469,11 @@
         </div>
         <div class="faq-item reveal">
           <h3>E se eu precisar mudar algo depois de pronto?</h3>
-          <p>Os primeiros 30 dias de ajuste pós-lançamento já estão inclusos. Depois disso, seguimos com manutenção sob demanda ou plano mensal, conforme sua necessidade.</p>
+          <p>Os primeiros 30 dias de ajuste pós-lançamento <mark class="ink">já estão inclusos</mark>. Depois disso, seguimos com manutenção sob demanda ou plano mensal, conforme sua necessidade.</p>
         </div>
         <div class="faq-item reveal">
           <h3>Preciso entender de tecnologia para manter o site?</h3>
-          <p>Não. Você recebe um painel simples para trocar textos, fotos e produtos, além de um treinamento rápido explicando cada parte antes da entrega.</p>
+          <p>Não. Você recebe um <mark class="ink">painel simples</mark> para trocar textos, fotos e produtos, além de um treinamento rápido explicando cada parte antes da entrega.</p>
         </div>
       </div>
     </div>
@@ -398,9 +500,9 @@
           <circle cx="20" cy="20" r="15" fill="var(--orange)"/>
           <circle cx="80" cy="20" r="15" fill="var(--orange)"/>
           <circle cx="50" cy="56" r="36" fill="var(--orange)"/>
-          <circle cx="37" cy="50" r="5.5" fill="var(--black)"/>
-          <circle cx="63" cy="50" r="5.5" fill="var(--black)"/>
-          <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--black)"/>
+          <circle cx="37" cy="50" r="5.5" fill="var(--on-orange)"/>
+          <circle cx="63" cy="50" r="5.5" fill="var(--on-orange)"/>
+          <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--on-orange)"/>
         </svg>
         <h3>ZOO</h3>
       </div>
@@ -431,5 +533,8 @@
 </footer>
 
 <script src="script.js"></script>
+<script src="headerScroll.js"></script>
+<script src="typing.js"></script>
+<script src="themeSwitch.js"></script>
 </body>
 </html>

@@ -10,10 +10,84 @@
     --orange-deep: #C73E0A;
     --orange-glow: rgba(255,90,31,0.16);
     --radius: 2px;
+
+    /* texto/ícone em cima de laranja (botões, selo, pill, CTA, olhos do
+       coala) — escuro nos DOIS temas, por isso não usa --black, que no
+       tema claro vira o fundo creme */
+    --on-orange: #0E0D0C;
+    --header-bg: rgba(14,13,12,0.86);
+    /* bolinhas flutuantes (nav compacta e tema): rgb separado por vírgula
+       porque o headerScroll.js monta rgba() com opacidade animada */
+    --float-bg-rgb: 23,20,15;
+    --float-line-rgb: 52,48,42;
+    --float-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    --float-shadow-hover: 0 10px 30px rgba(0,0,0,0.5);
+    --aurora-opacity: 0.18;
+    --section-shadow: 0 -10px 22px -12px rgba(0,0,0,0.75);
+    color-scheme: dark;
+  }
+
+  /* ---------- TEMA CLARO (creme) ----------
+     Ligado pela bolinha de tema (themeSwitch.js). Creme em vez de branco
+     puro pra não cansar a vista; o laranja fica um tom mais fechado pra
+     continuar legível em cima do claro. Só troca tokens — o resto do CSS
+     já usa as variáveis. */
+  html.theme-light{
+    --black: #ECE5D8;
+    --panel: #E4DCCD;
+    --panel-2: #DAD1C0;
+    --line: #CFC4B1;
+    --paper: #221D17;
+    --paper-dim: #5F574B;
+    --orange: #E4531B;
+    --orange-deep: #B23A0C;
+    --orange-glow: rgba(228,83,27,0.13);
+    --header-bg: rgba(236,229,216,0.86);
+    /* bolinhas no claro: fundo um branco quente MAIS claro que a página
+       (antes era quase o mesmo tom do creme e sumia), borda pêssego e
+       um anel laranja bem fraco por fora pra contornar a silhueta */
+    --float-bg-rgb: 252,247,240;
+    --float-line-rgb: 236,186,152;
+    --float-shadow: 0 0 0 3px rgba(228,83,27,0.08), 0 8px 24px rgba(60,42,24,0.22);
+    --float-shadow-hover: 0 0 0 3px rgba(228,83,27,0.12), 0 10px 28px rgba(60,42,24,0.28);
+    --aurora-opacity: 0.12;
+    --section-shadow: 0 -10px 22px -12px rgba(60,42,24,0.22);
+    color-scheme: light;
+  }
+  /* transição curta de cores só durante a troca de tema (a classe fica
+     ~450ms no <html>, ver themeSwitch.js) */
+  @media (prefers-reduced-motion: no-preference){
+    html.theme-switching,
+    html.theme-switching *{
+      transition:background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, fill 0.35s ease !important;
+    }
   }
 
   *{ box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
+
+  /* seleção de texto
+     Com o script ativo (html.ink-selection, ver script.js), a seleção
+     nativa fica transparente e quem pinta é o traço de marca-texto
+     que corre da esquerda pra direita com um leve atraso (mesma ideia
+     do Lidera360). Sem JS ou com "reduzir movimento", vale a seleção
+     laranja normal abaixo. */
+  ::selection{
+    background:#FF7A1A;
+    color:var(--on-orange);
+  }
+  ::-moz-selection{
+    background:#FF7A1A;
+    color:var(--on-orange);
+  }
+  html.ink-selection ::selection{
+    background:transparent;
+    color:inherit;
+  }
+  html.ink-selection ::-moz-selection{
+    background:transparent;
+    color:inherit;
+  }
   @media (prefers-reduced-motion: reduce){
     html{ scroll-behavior:auto; }
     *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
@@ -53,7 +127,7 @@
     position:absolute;
     left:16px; top:-60px;
     background:var(--orange);
-    color:var(--black);
+    color:var(--on-orange);
     padding:10px 16px;
     font-weight:600;
     font-size:14px;
@@ -61,6 +135,17 @@
     transition:top 0.2s ease;
   }
   .skip-link:focus{ top:16px; }
+
+  /* some da tela mas continua sendo lido por leitor de tela */
+  .sr-only{
+    position:absolute;
+    width:1px; height:1px;
+    margin:-1px; padding:0;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
+    white-space:nowrap;
+    border:0;
+  }
 
   .wrap{
     max-width:1180px;
@@ -100,10 +185,59 @@
     position:fixed;
     top:0; left:0; right:0;
     z-index:100;
-    background:rgba(14,13,12,0.86);
+    background:var(--header-bg);
     backdrop-filter:blur(10px);
     border-bottom:1px solid var(--line);
+    transition:background 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease;
   }
+  /* enquanto a nav está sobre a hero ela "some" e vira parte do
+     grid da primeira seção: sem fundo, sem blur (o blur borrava as
+     linhas) e sem borda própria — a nav tem 64px, igual ao tamanho
+     do quadrado do .grid-bg, então a linha do grid cai exatamente
+     embaixo dela e faz o papel de divisória.
+     Ao sair da hero volta ao estado sólido. (classe no script.js)
+     No desktop, o primeiro scroll ainda transforma a nav numa
+     bolinha — ver HEADER COMPACTO logo abaixo e headerScroll.js */
+  header.over-hero{
+    background:transparent;
+    border-bottom-color:transparent;
+    backdrop-filter:none;
+  }
+  /* menu mobile aberto em cima da hero: mantém a nav sólida */
+  header.over-hero:has(.mobile-nav.open){
+    background:var(--black);
+    border-bottom-color:var(--line);
+  }
+  /* ---------- HEADER COMPACTO (desktop) ----------
+     forma, tamanho e posição da bolinha são animados no
+     headerScroll.js, frame a frame; aqui fica só o que não
+     participa do morph: a bolinha em si, a sombra e o hover */
+  .nav-bubble{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border:0;
+    border-radius:50%;
+    background:transparent;
+    cursor:pointer;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity 0.2s ease, visibility 0.2s;
+  }
+  .nav-bubble.is-visible{ opacity:1; visibility:visible; }
+  header.is-compact{ box-shadow:var(--float-shadow); }
+  header.is-compact:hover{
+    transform:scale(1.08);
+    box-shadow:0 0 0 1px var(--orange), var(--float-shadow-hover);
+  }
+  /* escondidos de verdade na bolinha, pra não receberem foco pelo Tab */
+  header.is-compact .logo,
+  header.is-compact .nav-links,
+  header.is-compact .nav-cta{ visibility:hidden; }
+
   .nav{
     display:flex;
     align-items:center;
@@ -142,11 +276,11 @@
   }
   .btn-solid{
     background:var(--orange);
-    color:var(--black);
+    color:var(--on-orange);
     border-color:var(--orange);
   }
   .btn-solid:hover{ background:#ff7440; }
-  .btn:not(.btn-solid):hover{ background:var(--orange); color:var(--black); }
+  .btn:not(.btn-solid):hover{ background:var(--orange); color:var(--on-orange); }
   .nav-cta{ font-size:13px; padding:9px 18px; }
   .menu-toggle{
     display:none;
@@ -185,6 +319,49 @@
   .mobile-nav .btn{ margin-top:16px; justify-content:center; }
 
 
+  /* ---------- BOLINHA DE TEMA (themeSwitch.js) ----------
+     Fixa no canto inferior direito, mesmo tamanho e visual da bolinha
+     da nav compacta (64px). Lua no escuro, sol no claro — os dois em
+     laranja. */
+  .theme-toggle{
+    position:fixed;
+    bottom:20px; right:20px;
+    width:64px; height:64px;
+    padding:0;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(var(--float-bg-rgb),0.94);
+    border:1px solid rgb(var(--float-line-rgb));
+    box-shadow:var(--float-shadow);
+    backdrop-filter:blur(10px);
+    cursor:pointer;
+    overflow:hidden;
+    z-index:110;
+    transition:transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .theme-toggle:hover{
+    transform:scale(1.08);
+    box-shadow:0 0 0 1px var(--orange), var(--float-shadow-hover);
+  }
+  .theme-toggle:active{ transform:scale(0.92); }
+  .theme-toggle svg{
+    position:absolute;
+    width:26px; height:26px;
+    transition:opacity 0.45s ease, transform 0.45s cubic-bezier(.2,.7,.3,1);
+  }
+  .theme-toggle .icon-moon{ color:var(--orange); }
+  .theme-toggle .icon-sun{ color:var(--orange); opacity:0; transform:rotate(180deg) scale(0); }
+  html.theme-light .theme-toggle .icon-moon{ opacity:0; transform:rotate(-180deg) scale(0); }
+  html.theme-light .theme-toggle .icon-sun{ opacity:1; transform:rotate(0) scale(1); }
+
+  /* mobile: um pouco menor e mais perto da borda */
+  @media (max-width: 860px){
+    .theme-toggle{ bottom:16px; right:16px; width:52px; height:52px; }
+    .theme-toggle svg{ width:22px; height:22px; }
+  }
+
   /* ---------- HERO ---------- */
   .hero{
     position:relative;
@@ -192,16 +369,40 @@
     border-bottom:1px solid var(--line);
     overflow:hidden;
   }
+  /* fundo aurora (WebGL, ver script.js) — só na hero, bem apagado
+     pra não competir com o conteúdo */
+  .hero-aurora{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:var(--aurora-opacity);
+    pointer-events:none;
+    display:block;
+  }
+  .hero .marquee-wrap{ position:relative; }
   .hero-tag{
     display:flex;
     align-items:center;
     gap:10px;
     margin-bottom:28px;
   }
+  /* bolinha "respirando": cresce e acende devagar, depois apaga e
+     encolhe — com um halo suave que abre junto. Em em pra acompanhar
+     o tamanho do texto ao lado */
   .hero-tag .dot{
-    width:8px; height:8px;
+    width:0.7em; height:0.7em;
+    flex-shrink:0;
     background:var(--orange);
     border-radius:50%;
+    animation:breathe 2.8s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%, 100%{ opacity:0.4; transform:scale(0.82); box-shadow:0 0 0 0 var(--orange-glow); }
+    50%     { opacity:1;   transform:scale(1);    box-shadow:0 0 0 0.45em var(--orange-glow); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero-tag .dot{ animation:none; }
   }
   .hero h1{
     font-size:clamp(48px, 8vw, 108px);
@@ -210,10 +411,35 @@
     transform:translateY(24px);
     animation:rise 0.7s cubic-bezier(.2,.7,.3,1) forwards;
   }
-  .hero h1 span{ display:block; }
-  .hero h1 .l2{ animation-delay:0.12s; opacity:0; }
-  .hero h1 .l3{ animation-delay:0.24s; opacity:0; color:var(--orange); }
+  /* ">" pra pegar só as 3 linhas — os spans do efeito de digitação
+     dentro da .l3 não podem virar block nem ganhar a animação */
+  .hero h1 > span{
+    display:block;
+    opacity:0;
+    transform:translateY(24px);
+    animation:rise 0.7s cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  .hero h1 .l2{ animation-delay:0.12s; }
+  .hero h1 .l3{ animation-delay:0.24s; color:var(--orange); }
   @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+
+  /* palavra digitada no título (typing.js) + cursor */
+  .typed-word{ white-space:nowrap; }
+  .typed-word::after{
+    content:"";
+    display:inline-block;
+    width:0.07em;
+    height:0.78em;
+    margin-left:0.06em;
+    background:currentColor;
+    vertical-align:-0.02em;
+    animation:caret-blink 1s steps(1) infinite;
+  }
+  .typed-word.is-typing::after{ animation:none; }
+  @keyframes caret-blink{ 50%{ opacity:0; } }
+  @media (prefers-reduced-motion: reduce){
+    .typed-word::after{ display:none; }
+  }
 
   .hero p.lede{
     max-width:520px;
@@ -267,6 +493,14 @@
 
   /* ---------- SECTION HEAD ---------- */
   section{ position:relative; padding:110px 0; }
+  /* divisória entre seções: sombra bem curta que cai da borda de cima de
+     cada seção sobre a anterior (a seção seguinte pinta por cima porque
+     vem depois no HTML e é position:relative) */
+  main > section:not(:first-child),
+  footer{
+    position:relative;
+    box-shadow:var(--section-shadow);
+  }
   .sec-head{
     display:flex;
     justify-content:space-between;
@@ -352,6 +586,35 @@
     z-index:0;
   }
   .step{ position:relative; z-index:1; }
+  /* linha da timeline em segmentos: cada passo (menos o último) tem um
+     trecho que vai do centro do seu marcador até o centro do próximo.
+     ::before = trilho cinza, ::after = preenchimento laranja, que o
+     script.js vai enchendo pela variável --fill (0 a 1), em sequência.
+     Desktop: horizontal (largura da coluna + gap de 24px).
+     Mobile: vertical (ver @media no fim do arquivo). */
+  .step:not(:last-child)::before,
+  .step:not(:last-child)::after{
+    content:"";
+    position:absolute;
+    top:23px; left:23px;
+    width:calc(100% + 24px);
+    height:1px;
+    z-index:0;
+  }
+  .step:not(:last-child)::before{ background:var(--line); }
+  .step:not(:last-child)::after{
+    background:var(--orange);
+    transform-origin:left center;
+    transform:scaleX(var(--fill, 0));
+  }
+  /* marcador acende quando a linha chega nele (.is-done, script.js) */
+  .step.is-done .step-marker{
+    background:var(--orange);
+    color:var(--on-orange);
+    box-shadow:0 0 0 6px var(--orange-glow);
+    animation:marker-pop 0.45s ease-out;
+  }
+  @keyframes marker-pop{ 50%{ transform:scale(1.1); } }
   .step-marker{
     width:46px; height:46px;
     border-radius:50%;
@@ -364,6 +627,9 @@
     color:var(--orange);
     background:var(--black);
     margin-bottom:26px;
+    position:relative;
+    z-index:1; /* fica por cima do segmento da linha */
+    transition:background-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease;
   }
   .step h3{ font-size:22px; margin-bottom:10px; color:var(--paper); font-family:'Inter',sans-serif; font-weight:700;}
   .step p{ font-size:13.5px; color:var(--paper-dim); line-height:1.6; max-width:230px; }
@@ -401,6 +667,133 @@
   .project-info h3{ font-size:24px; color:var(--paper); font-family:'Inter',sans-serif; font-weight:700; margin-bottom:8px; }
   .project-info p{ font-size:13.5px; color:var(--paper-dim); line-height:1.55; }
 
+  /* ---------- PRICING ---------- */
+  .plan-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:26px;
+    align-items:stretch;
+  }
+  .plan-card{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:32px 30px 30px;
+    transition:border-color 0.25s ease;
+  }
+  .plan-card:hover{ border-color:rgba(255,90,31,0.5); }
+  .plan-card--featured,
+  .plan-card--featured:hover{
+    border-color:var(--orange);
+    background:linear-gradient(180deg, var(--orange-glow), transparent 55%), var(--panel);
+  }
+  .plan-badge{
+    position:absolute;
+    top:-11px; right:24px;
+    background:var(--orange);
+    color:var(--on-orange);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    padding:4px 10px;
+  }
+  .plan-name{ display:block; margin-bottom:18px; }
+  .plan-card h3{ font-size:30px; color:var(--paper); margin-bottom:12px; }
+  .plan-desc{
+    font-size:14px;
+    color:var(--paper-dim);
+    line-height:1.6;
+    margin:0 0 24px;
+  }
+  .plan-price-from{
+    display:block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    margin-bottom:4px;
+  }
+  .plan-price{
+    display:block;
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:52px;
+    line-height:1;
+    color:var(--paper);
+    margin-bottom:26px;
+  }
+  .plan-price small{
+    font-size:0.45em;
+    color:var(--paper-dim);
+    margin-right:6px;
+    vertical-align:0.55em;
+  }
+  .plan-card .spec-list{ flex:1; margin-bottom:28px; }
+  .plan-card .btn{ justify-content:center; }
+  .plan-note{
+    margin:34px auto 0;
+    max-width:620px;
+    text-align:center;
+    font-size:13px;
+    line-height:1.6;
+    color:var(--paper-dim);
+  }
+
+  /* pill deslizante: duas versões do plano no mesmo card, trocando
+     com crossfade + slide sem o card mudar de tamanho — as duas panes
+     ocupam a mesma célula do grid, então a altura é a da maior.
+     A troca em si fica no script.js (mesma lógica do Lidera360) */
+  .plan-toggle{
+    position:relative;
+    display:flex;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px;
+    margin-bottom:24px;
+  }
+  .plan-toggle-thumb{
+    position:absolute;
+    top:4px; bottom:4px; left:4px;
+    width:calc(50% - 4px);
+    background:var(--orange);
+    border-radius:999px;
+    box-shadow:0 4px 14px rgba(255,90,31,0.35);
+    transition:transform 0.4s cubic-bezier(.65,0,.35,1);
+  }
+  .plan-toggle-btn{
+    position:relative;
+    z-index:1;
+    flex:1;
+    border:0;
+    background:transparent;
+    padding:9px 8px;
+    border-radius:999px;
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--paper-dim);
+    cursor:pointer;
+    transition:color 0.3s ease;
+  }
+  .plan-toggle-btn:not(.is-active):hover{ color:var(--paper); }
+  .plan-toggle-btn.is-active{ color:var(--on-orange); }
+  .plan-toggle-panes{ display:grid; flex:1; }
+  .plan-toggle-pane{
+    grid-row:1; grid-column:1;
+    display:flex;
+    flex-direction:column;
+    opacity:0;
+    pointer-events:none;
+    transform:translateX(16px);
+    transition:opacity 0.4s cubic-bezier(.16,1,.3,1), transform 0.4s cubic-bezier(.16,1,.3,1);
+  }
+  .plan-toggle-pane.is-active{ opacity:1; pointer-events:auto; transform:translateX(0); }
+
   /* ---------- DELIVERABLES ---------- */
   .deliverables{
     display:grid;
@@ -426,12 +819,38 @@
     display:flex; align-items:center; justify-content:center;
     font-size:12px;
     flex-shrink:0;
+    transition:background-color 0.3s ease;
   }
+  /* check desenhado: a caixa entra junto com o item (.reveal) e, logo
+     depois, o traço do check se desenha (stroke-dashoffset 1 → 0; o
+     pathLength="1" no SVG normaliza o comprimento). O delay de cada
+     item acompanha o escalonamento do .stagger + o tempo da entrada. */
+  /* o svg repassa o delay do .check-box pro path (inherit só pega do pai direto) */
+  .check-box svg{ width:12px; height:12px; overflow:visible; transition-delay:inherit; }
+  .check-box path{
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-dasharray:1;
+    stroke-dashoffset:1;
+    transition:stroke-dashoffset 0.35s cubic-bezier(.65,0,.35,1);
+    transition-delay:inherit;
+  }
+  .check-list li.is-visible .check-box{ background-color:var(--orange-glow); }
+  .check-list li.is-visible .check-box path{ stroke-dashoffset:0; }
+  .check-list li:nth-child(1) .check-box{ transition-delay:0.45s; }
+  .check-list li:nth-child(2) .check-box{ transition-delay:0.53s; }
+  .check-list li:nth-child(3) .check-box{ transition-delay:0.61s; }
+  .check-list li:nth-child(4) .check-box{ transition-delay:0.69s; }
+  .check-list li:nth-child(5) .check-box{ transition-delay:0.77s; }
+  .check-list li:nth-child(6) .check-box{ transition-delay:0.85s; }
 
   /* ---------- CTA ---------- */
   .cta-final{
     background:var(--orange);
-    color:var(--black);
+    color:var(--on-orange);
     border-bottom:1px solid var(--line);
   }
   .cta-final .wrap{
@@ -443,15 +862,15 @@
   }
   .cta-final h2{
     font-size:clamp(36px, 5.5vw, 62px);
-    color:var(--black);
+    color:var(--on-orange);
     max-width:640px;
   }
   .cta-final .btn{
-    border-color:var(--black);
-    color:var(--black);
+    border-color:var(--on-orange);
+    color:var(--on-orange);
     white-space:nowrap;
   }
-  .cta-final .btn:hover{ background:var(--black); color:var(--orange); }
+  .cta-final .btn:hover{ background:var(--on-orange); color:var(--orange); }
   .cta-final .side{ display:flex; flex-direction:column; gap:14px; align-items:flex-start; }
   .cta-final .contact-line{ font-family:'JetBrains Mono', monospace; font-size:13px; color:#3a1a0c; }
 
@@ -504,6 +923,24 @@
     font-size:13px;
     color:var(--paper-dim);
     margin-top:8px;
+  }
+
+  /* contador dos números (script.js): o número e o sufixo entram como
+     "palavras" separadas, desfocadas e vindo de cima — inspirado no
+     BlurText do React Bits — enquanto o número sobe de 0 até o final */
+  .count-word{
+    display:inline-block;
+    opacity:0;
+    font-variant-numeric:tabular-nums;
+  }
+  .count-word.is-spaced{ margin-left:0.22em; }
+  .is-counting .count-word{
+    animation:blur-in 0.7s cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  @keyframes blur-in{
+    0%  { opacity:0;   filter:blur(10px); transform:translateY(-24px); }
+    50% { opacity:0.5; filter:blur(5px);  transform:translateY(3px); }
+    100%{ opacity:1;   filter:blur(0);    transform:translateY(0); }
   }
 
   /* ---------- TESTIMONIALS ---------- */
@@ -579,15 +1016,78 @@
   .stagger > *:nth-child(5){ transition-delay:0.32s; }
   .stagger > *:nth-child(6){ transition-delay:0.4s; }
 
+  /* ---------- MARCA-TEXTO ----------
+     <mark class="ink"> nos trechos que mais pesam na decisão de quem
+     está pensando em contratar: resultado, prazo, preço sem surpresa,
+     posse do site e suporte. O traço é um background que cresce de 0 a
+     100% da largura — o texto fica por cima sem z-index, e o
+     box-decoration-break faz o traço quebrar junto com a linha.
+     Quem liga (.is-inked) é o script.js, depois que o bloco termina de
+     surgir. Mesma técnica do Lidera360, na cor do Zoo. */
+  mark.ink{
+    background-color:transparent;   /* mata o amarelo padrão do <mark> */
+    color:inherit;
+    background-image:linear-gradient(rgba(255,90,31,0.3), rgba(255,90,31,0.3));
+    background-repeat:no-repeat;
+    background-position:left center;
+    background-size:0% 100%;
+    border-radius:2px;
+    padding:0.06em 0.16em;
+    margin:0 -0.16em;                /* devolve o padding, pro texto não "abrir" */
+    box-decoration-break:clone;
+    -webkit-box-decoration-break:clone;
+    transition:background-size 0.55s cubic-bezier(.16,1,.3,1), color 0.55s ease;
+  }
+  /* o texto marcado clareia pro --paper junto com a caneta, pra se
+     destacar do --paper-dim do resto do parágrafo */
+  mark.ink.is-inked{
+    background-size:100% 100%;
+    color:var(--paper);
+  }
+
+  /* sublinhado: versão minimalista do marca-texto — uma linha laranja
+     de 2px que corre da esquerda pra direita embaixo do trecho. Mesmo
+     gatilho e mesmo tempo do mark.ink (script.js adiciona .is-inked) */
+  .uline{
+    background-image:linear-gradient(var(--orange), var(--orange));
+    background-repeat:no-repeat;
+    background-position:0 100%;
+    background-size:0% 2px;
+    padding-bottom:1px;
+    box-decoration-break:clone;
+    -webkit-box-decoration-break:clone;
+    transition:background-size 0.55s cubic-bezier(.16,1,.3,1);
+  }
+  .uline.is-inked{ background-size:100% 2px; }
+
 
   @media (max-width: 860px){
     .nav-links{ display:none; }
     .menu-toggle{ display:flex; }
     .nav-cta{ display:none; }
     .service-grid{ grid-template-columns:1fr; }
-    .process-line{ grid-template-columns:1fr 1fr; row-gap:44px; }
+    /* timeline vira vertical: marcador à esquerda, texto à direita, e os
+       segmentos descem do centro de um marcador até o centro do próximo */
+    .process-line{ grid-template-columns:1fr; gap:0; }
     .process-line::before{ display:none; }
+    .step{
+      display:grid;
+      grid-template-columns:46px 1fr;
+      column-gap:20px;
+      padding-bottom:36px;
+    }
+    .step:last-child{ padding-bottom:0; }
+    .step-marker{ grid-row:1 / span 2; margin-bottom:0; }
+    .step h3{ grid-column:2; margin:12px 0 8px; }
+    .step p{ grid-column:2; margin:0; max-width:none; }
+    .step:not(:last-child)::before,
+    .step:not(:last-child)::after{ width:1px; height:100%; }
+    .step:not(:last-child)::after{
+      transform-origin:center top;
+      transform:scaleY(var(--fill, 0));
+    }
     .project-grid{ grid-template-columns:1fr 1fr; }
+    .plan-grid{ grid-template-columns:1fr; max-width:520px; }
     .deliverables{ grid-template-columns:1fr; gap:36px; }
     .cta-final .wrap{ flex-direction:column; align-items:flex-start; }
     .foot-links{ gap:34px; }
