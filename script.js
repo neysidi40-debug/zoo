@@ -579,3 +579,27 @@
       timelineObserver.observe(timeline);
     }
   }
+
+  // Fio de progresso de leitura no topo da página (adaptado do Lidera360).
+  // Cresce conforme a pessoa rola, do início ao fim do documento.
+  // Anima por scaleX em vez de width: transform não recalcula layout, então
+  // a barra acompanha a rolagem sem pesar. As atualizações são agrupadas num
+  // requestAnimationFrame, pra rodar no máximo uma vez por quadro.
+  const progressBar = document.createElement('div');
+  progressBar.className = 'scroll-progress';
+  document.body.appendChild(progressBar);
+
+  let progressRaf = null;
+  const updateProgress = () => {
+    progressRaf = null;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    progressBar.style.transform = `scaleX(${progress})`;
+  };
+  const queueProgress = () => {
+    if (!progressRaf) progressRaf = requestAnimationFrame(updateProgress);
+  };
+
+  window.addEventListener('scroll', queueProgress, { passive: true });
+  window.addEventListener('resize', queueProgress);
+  updateProgress();

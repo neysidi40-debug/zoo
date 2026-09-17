@@ -72,9 +72,9 @@
         <circle cx="20" cy="20" r="15" fill="var(--orange)"/>
         <circle cx="80" cy="20" r="15" fill="var(--orange)"/>
         <circle cx="50" cy="56" r="36" fill="var(--orange)"/>
-        <circle cx="37" cy="50" r="5.5" fill="var(--on-orange)"/>
+        <!-- <circle cx="37" cy="50" r="5.5" fill="var(--on-orange)"/>
         <circle cx="63" cy="50" r="5.5" fill="var(--on-orange)"/>
-        <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--on-orange)"/>
+        <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--on-orange)"/> -->
       </svg>
       ZOO
     </a>
@@ -82,6 +82,7 @@
       <a href="#servicos">Serviços</a>
       <a href="#processo">Processo</a>
       <a href="#projetos">Projetos</a>
+      <a href="#time">Time</a>
       <a href="#precos">Preços</a>
       <a href="#contato">Contato</a>
     </nav>
@@ -96,15 +97,13 @@
       <circle cx="20" cy="20" r="15" fill="var(--orange)"/>
       <circle cx="80" cy="20" r="15" fill="var(--orange)"/>
       <circle cx="50" cy="56" r="36" fill="var(--orange)"/>
-      <circle cx="37" cy="50" r="5.5" fill="var(--on-orange)"/>
-      <circle cx="63" cy="50" r="5.5" fill="var(--on-orange)"/>
-      <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--on-orange)"/>
     </svg>
   </button>
   <nav class="mobile-nav" id="mobileNav" aria-label="Navegação mobile">
     <a href="#servicos">Serviços</a>
     <a href="#processo">Processo</a>
     <a href="#projetos">Projetos</a>
+    <a href="#time">Time</a>
     <a href="#precos">Preços</a>
     <a href="#contato">Contato</a>
     <a class="btn btn-solid" href="#contato">Iniciar projeto</a>
@@ -125,12 +124,28 @@
       <h1>
         <span>Bonitos de ver,</span>
         <span class="l2">fáceis de usar,</span>
-        <span class="l3">feitos pra <span class="typed-word" data-words="crescer|vender|durar|encantar" aria-hidden="true">crescer</span><span class="sr-only">crescer</span>.</span>
+        <span class="l3">feitos pra <span class="typed-word" data-words="crescer|vender|durar" aria-hidden="true">crescer</span><span class="sr-only">crescer</span>.</span>
       </h1>
       <p class="lede">Projetamos e construímos o site do seu negócio do zero — estrutura, design e conteúdo pensados para <mark class="ink">transformar visita em cliente</mark>, não apenas para ficar bonito parado.</p>
       <div class="hero-actions">
-        <a class="btn btn-solid" href="#contato">Pedir orçamento</a>
-        <a class="btn" href="#projetos">Ver projetos</a>
+        <!-- botão especular (shader WebGL) — ver specular.js.
+             Os data-* abaixo são os props do componente original. -->
+        <a class="specular-button specular-button--lg" href="#contato"
+           data-radius="18" data-line-color="#ffffff" data-base-color="#525252"
+           data-intensity="1" data-shine-size="10" data-shine-fade="40"
+           data-thickness="1" data-speed="0.35" data-proximity="250"
+           data-follow-mouse="true" data-auto-animate="false">
+          <span class="specular-button__fx" aria-hidden="true"></span>
+          <span class="specular-button__label">Pedir orçamento</span>
+        </a>
+        <!-- "Ver projetos" em forma de árvore de diretórios; o sublinhado
+             se desenha sozinho depois que a linha aparece (ver style.css) -->
+        <div class="hero-tree">
+          <a class="hero-tree__link" href="#projetos">
+            <span class="hero-tree__branch mono" aria-hidden="true">└──</span>
+            <span class="hero-tree__label">Ver projetos</span>
+          </a>
+        </div>
       </div>
     </div>
 
@@ -142,7 +157,7 @@
     </div>
   </section>
 
-  <!-- TRUST BAR -->
+  <!-- TRUST BAR
   <section style="padding:0;">
     <div class="trust-bar stagger">
       <div class="trust-item reveal">
@@ -162,7 +177,7 @@
         <div class="label">de suporte pós-lançamento</div>
       </div>
     </div>
-  </section>
+  </section> -->
 
   <!-- SERVICES -->
   <section class="services" id="servicos">
@@ -236,6 +251,14 @@
           <figure class="carousel-slide">
             <img src="https://picsum.photos/seed/zoo-oficina/960/600" alt="Prévia do sistema da Oficina Torque" loading="lazy" draggable="false">
             <figcaption><span>Oficina Torque</span><span class="mono">SISTEMA</span></figcaption>
+          </figure>
+          <!-- placeholder: último slide, reservado pro próximo projeto -->
+          <figure class="carousel-slide">
+            <div class="carousel-placeholder">
+              <span class="mono">PRÓXIMO PROJETO</span>
+              <p>Seu site pode ser o próximo aqui.</p>
+            </div>
+            <figcaption><span>Seu projeto</span><span class="mono">VAGA ABERTA</span></figcaption>
           </figure>
         </div>
         <!-- setas dentro do carrossel: bem apagadas, acendem e esticam no hover -->
@@ -369,6 +392,71 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM — cargos abaixo são provisórios, ajustar com os nomes reais.
+       Dharlan ainda sem foto: o card usa o bloco de iniciais. -->
+  <section class="team" id="time">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <h2>Quem faz<br>acontecer</h2>
+        <p class="note">Time pequeno e direto: você fala com quem desenha e programa o seu site, sem intermediário.</p>
+      </div>
+
+      <div class="team-grid stagger">
+        <div class="team-card reveal">
+          <div class="team-photo team-photo--empty">
+            <span class="team-initials" aria-hidden="true">DH</span>
+            <span class="mono team-soon">FOTO EM BREVE</span>
+          </div>
+          <div class="team-info">
+            <span class="mono">DESIGN &amp; FRONT-END</span>
+            <h3>Dharlan</h3>
+          </div>
+        </div>
+
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="fotos-integrantes/moises.png" alt="Moisés" loading="lazy" width="1254" height="1254" draggable="false">
+          </div>
+          <div class="team-info">
+            <span class="mono">BACK-END</span>
+            <h3>Moisés</h3>
+          </div>
+        </div>
+
+        <div class="team-card reveal">
+          <div class="team-photo team-photo--empty">
+            <span class="team-initials" aria-hidden="true">LU</span>
+            <span class="mono team-soon">FOTO EM BREVE</span>
+          </div>
+          <div class="team-info">
+            <span class="mono">BACK-END</span>
+            <h3>Luan</h3>
+          </div>
+        </div>
+
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="fotos-integrantes/russio.png" alt="Russio" loading="lazy" width="1086" height="1448" draggable="false">
+          </div>
+          <div class="team-info">
+            <span class="mono">VENDAS</span>
+            <h3>Russio</h3>
+          </div>
+        </div>
+
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <img src="fotos-integrantes/sidi.png" alt="Sidi" loading="lazy" width="1024" height="1536" draggable="false">
+          </div>
+          <div class="team-info">
+            <span class="mono">SUPORTE</span>
+            <h3>Sidi</h3>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -540,6 +628,8 @@
 
   <!-- CTA FINAL -->
   <section class="cta-final" id="contato">
+    <!-- fundo de ondas de formas que seguem o mouse — ver ctaWaves.js -->
+    <canvas class="cta-waves" id="ctaWaves" aria-hidden="true"></canvas>
     <div class="wrap">
       <h2 class="reveal">Vamos construir<br>o site do seu negócio.</h2>
       <div class="side reveal">
@@ -559,9 +649,9 @@
           <circle cx="20" cy="20" r="15" fill="var(--orange)"/>
           <circle cx="80" cy="20" r="15" fill="var(--orange)"/>
           <circle cx="50" cy="56" r="36" fill="var(--orange)"/>
-          <circle cx="37" cy="50" r="5.5" fill="var(--on-orange)"/>
-          <circle cx="63" cy="50" r="5.5" fill="var(--on-orange)"/>
-          <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--on-orange)"/>
+          <!-- <circle cx="37" cy="50" r="5.5" fill="var(--on-orange)"/> -->
+          <!-- <circle cx="63" cy="50" r="5.5" fill="var(--on-orange)"/> -->
+          <!-- <ellipse cx="50" cy="64" rx="11" ry="8" fill="var(--on-orange)"/> -->
         </svg>
         <h3>ZOO</h3>
       </div>
@@ -596,5 +686,7 @@
 <script src="typing.js"></script>
 <script src="themeSwitch.js"></script>
 <script src="carousel.js"></script>
+<script src="ctaWaves.js"></script>
+<script src="specular.js"></script>
 </body>
 </html>

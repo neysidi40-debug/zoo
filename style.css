@@ -29,6 +29,14 @@
        <body>); dá pra somar outros depois, ex.: url(#logo-inner-shadow) saturate(1.2) */
     --hero-logo-opacity: 0.7;
     --hero-logo-filter: url(#logo-inner-shadow);
+
+    /* vidro dos botões (glassmorphism): fundo translúcido + desfoque do que
+       está atrás. --glass-strong é a versão cheia, dos botões laranja */
+    --glass-bg: rgba(255,255,255,0.07);
+    --glass-strong: rgba(255,90,31,0.82);
+    --glass-strong-hover: rgba(255,116,64,0.9);
+    --glass-sheen: inset 0 1px 0 rgba(255,255,255,0.14);
+    --glass-blur: blur(12px) saturate(140%);
     color-scheme: dark;
   }
 
@@ -61,6 +69,11 @@
        no mesmo lugar) + um brilho laranja bem fraco */
     --section-shadow: 0 -1px 0 0 var(--orange), 0 -10px 22px -12px rgba(228,83,27,0.28);
     --hero-logo-opacity: 0.55;
+    /* no creme o vidro é um branco quente, e a "luz" de cima quase some */
+    --glass-bg: rgba(255,255,255,0.5);
+    --glass-strong: rgba(228,83,27,0.85);
+    --glass-strong-hover: rgba(240,100,45,0.92);
+    --glass-sheen: inset 0 1px 0 rgba(255,255,255,0.5);
     color-scheme: light;
   }
   /* transição curta de cores só durante a troca de tema (a classe fica
@@ -201,6 +214,20 @@
   .crosshair::before{ width:100%; height:1px; top:50%; left:0; }
   .crosshair::after{ height:100%; width:1px; left:50%; top:0; }
 
+  /* fio de progresso de leitura, criado pelo JS (ver script.js).
+     Adaptado do .scroll-progress do Lidera360, no laranja do site.
+     z-index alto de propósito: o header é 100 e fica colado no topo, então
+     com um valor menor ele cobriria os 2px da barra. */
+  .scroll-progress{
+    position:fixed; top:0; left:0;
+    width:100%; height:2px;
+    transform:scaleX(0); transform-origin:left center;
+    background:linear-gradient(90deg, var(--orange), #FF9A5A);
+    box-shadow:0 0 12px rgba(255,90,31,0.55);
+    z-index:120; pointer-events:none;
+    will-change:transform;
+  }
+
   /* ---------- HEADER ---------- */
   header{
     position:fixed;
@@ -291,21 +318,81 @@
     font-weight:600;
     border:1px solid var(--orange);
     color:var(--paper);
-    background:transparent;
+    /* vidro: fundo translúcido + desfoque do que passa atrás */
+    background:var(--glass-bg);
+    backdrop-filter:var(--glass-blur);
+    -webkit-backdrop-filter:var(--glass-blur);
+    box-shadow:var(--glass-sheen);
     cursor:pointer;
-    transition:background 0.2s ease, color 0.2s ease;
+    transition:background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   }
   .btn-solid{
-    background:var(--orange);
+    background:var(--glass-strong);
     color:var(--on-orange);
     border-color:var(--orange);
   }
-  .btn-solid:hover{ background:#ff7440; }
+  .btn-solid:hover{ background:var(--glass-strong-hover); }
   .btn:not(.btn-solid):hover{ background:var(--orange); color:var(--on-orange); }
+  /* ---------- BOTÃO ESPECULAR ----------
+     Porte do SpecularButton.css (React Bits). Quem desenha o brilho da
+     borda é um shader WebGL — ver specular.js.
+     Diferença proposital: o original vem com fundo transparente
+     (--sb-tint-opacity 0, --sb-blur 0); aqui usa o MESMO vidro padrão dos
+     outros botões do site (--glass-bg/--glass-blur/--glass-sheen), em vez
+     de um vidro próprio — é o que deixa ele "igual ao resto do site" em
+     vez de destoar. Chegou a ter um fundo de ondas com dither (dither.js)
+     dentro dele; foi removido por pedido do usuário, ficou destoando. */
+  .specular-button{
+    --sb-radius:18px;
+    --sb-text-color:#f5f5f5;
+
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    margin:0;
+    font-family:inherit;
+    font-weight:500;
+    letter-spacing:0.01em;
+    line-height:1;
+    color:var(--sb-text-color);
+    background:var(--glass-bg);
+    border-radius:var(--sb-radius);
+    backdrop-filter:var(--glass-blur);
+    -webkit-backdrop-filter:var(--glass-blur);
+    box-shadow:
+      var(--glass-sheen),
+      0 8px 24px rgba(0,0,0,0.25);
+    cursor:pointer;
+    outline:none;
+    transition:transform 0.15s ease;
+  }
+  .specular-button:active{ transform:scale(0.97); }
+  .specular-button:focus-visible{
+    outline:2px solid color-mix(in srgb, var(--sb-text-color) 60%, transparent);
+    outline-offset:3px;
+  }
+  .specular-button--sm{ font-size:0.85rem; padding:10px 22px; }
+  .specular-button--md{ font-size:1rem; padding:14px 30px; }
+  .specular-button--lg{ font-size:1.15rem; padding:18px 40px; }
+  /* o canvas passa 20px pra fora do botão, pro brilho da borda poder vazar */
+  .specular-button__fx{
+    position:absolute;
+    inset:-20px;
+    pointer-events:none;
+    z-index:1;
+  }
+  .specular-button__fx canvas{ display:block; width:100%; height:100%; }
+  .specular-button__label{ position:relative; z-index:2; }
+
   .nav-cta{ font-size:13px; padding:9px 18px; }
   .menu-toggle{
     display:none;
-    background:transparent;
+    background:var(--glass-bg);
+    backdrop-filter:var(--glass-blur);
+    -webkit-backdrop-filter:var(--glass-blur);
+    box-shadow:var(--glass-sheen);
     border:1px solid var(--line);
     width:40px; height:40px;
     align-items:center;
@@ -384,11 +471,29 @@
   }
 
   /* ---------- HERO ---------- */
+  /* o hero ocupa a primeira tela inteira: o conteúdo fica centralizado no
+     espaço que sobra e o letreiro encosta na base, então nada da seção
+     seguinte aparece antes de rolar. svh (altura "pequena") desconta a
+     barra do navegador no celular; vh fica de reserva pra quem não tem svh */
   .hero{
     position:relative;
-    padding:180px 0 90px;
+    min-height:100vh;
+    min-height:100svh;
+    display:flex;
+    flex-direction:column;
+    padding:110px 0 0;
     border-bottom:1px solid var(--line);
     overflow:hidden;
+  }
+  .hero > .wrap{
+    /* width:100% é obrigatório: como item flex com margin:0 auto, a caixa
+       encolheria até o conteúdo em vez de manter os 1180px centralizados
+       (e a logo, que se alinha pela borda do .wrap, viria junto pro meio) */
+    width:100%;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
   }
   /* fundo aurora (WebGL, ver script.js) — só na hero, bem apagado
      pra não competir com o conteúdo */
@@ -401,7 +506,9 @@
     pointer-events:none;
     display:block;
   }
-  .hero .marquee-wrap{ position:relative; }
+  /* encostado na base do hero: a borda de baixo dele seria linha dupla
+     com a borda da própria seção, então sai uma */
+  .hero .marquee-wrap{ position:relative; border-bottom:none; }
 
   /* ---------- LOGO AO LADO DO CONTEÚDO DA HERO ----------
      Mesmo esquema do #header-expandida::before do dharlan.world: uma
@@ -421,35 +528,81 @@
        right = padding do .wrap (32px, mesma borda do botão)
                − margem direita transparente (15,52% da largura da logo)
      O translateY da centralização vai junto dentro da animação, senão a
-     flutuação o apagaria. */
-  .hero > .wrap::before{
-    /* menor que antes pra sobrar espaço mesmo quando o título digita a
-       palavra mais longa do ciclo ("encantar") */
-    --logo-w:clamp(280px, 26vw, 360px);
+     flutuação o apagaria.
+
+     A PISCADA: são duas camadas iguais, uma em cima da outra —
+     ::after = zoo-eyes-open.png (os dois olhos abertos) e
+     ::before = zoo.png (o olho esquerdo fechado, como a logo é de fato).
+     A logo entra com os dois olhos abertos, e lá pelo 3º segundo a camada
+     de cima some em 90ms enquanto a de baixo aparece: isso é a piscada.
+     Depois fica fechada pra sempre. Uma imagem só não daria: o traço do
+     olho fechado é mais largo que a bolinha e apareceria por baixo dela.
+     (A zoo-eyes-open.png foi gerada a partir da zoo.png, apagando o traço
+     e copiando a bolinha do olho direito pro lugar do esquerdo.) */
+  .hero > .wrap::before,
+  .hero > .wrap::after{
+    --logo-w:clamp(320px, 30vw, 410px);
     content:"";
     position:absolute;
-    top:50%;
+    top:41%;
     right:calc(32px - var(--logo-w) * 0.1552);
     width:var(--logo-w);
     aspect-ratio:612 / 408;
-    background:url("zoo.png") center / contain no-repeat;
+    background-position:center;
+    background-size:contain;
+    background-repeat:no-repeat;
     filter:var(--hero-logo-filter);
     opacity:0;
     pointer-events:none;
-    transform:translateY(-46.7%); /* -50% + 3,31%: centraliza o desenho, não a caixa */
+    /* inclinação da logo, no sentido horário. Gira pelo centro
+       (transform-origin abaixo), então ela não sai do lugar.
+       O mesmo ângulo é repetido dentro do fragment-float, senão a
+       flutuação zeraria a rotação quando começasse */
+    --logo-tilt:6deg;
+    transform:translateY(-46.7%) rotate(var(--logo-tilt)); /* -46,7% = -50% + 3,31%: centraliza o desenho, não a caixa */
     transform-origin:center;
-    animation:
-      hero-logo-in 1s ease 0.8s forwards,
-      fragment-float 8s ease-in-out 1.8s infinite;
+    /* 1ª animação: entrada + piscada | 2ª: a flutuação de sempre.
+       Linha do tempo: 0,8s parada → aparece até 1,3s → olhos abertos por
+       0,9s → pisca em 300ms (macio) e fica fechado */
+    animation-duration:1.2s, 8s;
+    animation-delay:0.8s, 1.3s;
+    animation-timing-function:linear, ease-in-out;
+    animation-iteration-count:1, infinite;
+    animation-fill-mode:forwards, none;
   }
-  @keyframes hero-logo-in{ to{ opacity:var(--hero-logo-opacity); } }
+  .hero > .wrap::before{
+    background-image:url("zoo.png");
+    animation-name:hero-logo-closed, fragment-float;
+  }
+  .hero > .wrap::after{
+    background-image:url("zoo-eyes-open.png");
+    animation-name:hero-logo-open, fragment-float;
+  }
+  /* olhos abertos: entram com a logo, ficam até a piscada e somem.
+     A piscada vai de 90% a 96% dos 3s (~180ms), com curva suave nas duas
+     camadas ao mesmo tempo, pra o olho fechar macio em vez de trocar seco */
+  @keyframes hero-logo-open{
+    0%  { opacity:0; animation-timing-function:ease; }
+    42% { opacity:var(--hero-logo-opacity); }
+    75% { opacity:var(--hero-logo-opacity); animation-timing-function:cubic-bezier(.45,0,.55,1); }
+    100%{ opacity:0; }
+  }
+  /* olho fechado: só aparece na piscada, e fica */
+  @keyframes hero-logo-closed{
+    0%  { opacity:0; }
+    75% { opacity:0; animation-timing-function:cubic-bezier(.45,0,.55,1); }
+    100%{ opacity:var(--hero-logo-opacity); }
+  }
   @keyframes fragment-float{
-    0%, 100%{ transform:translateY(-46.7%) translate(0, 0) rotate(0deg); }
-    50%     { transform:translateY(-46.7%) translate(5px, -5px) rotate(0.5deg); }
+    0%, 100%{ transform:translateY(-46.7%) translate(0, 0) rotate(var(--logo-tilt)); }
+    50%     { transform:translateY(-46.7%) translate(5px, -5px) rotate(calc(var(--logo-tilt) + 0.5deg)); }
   }
   /* tablet/celular: não sobra espaço ao lado do texto — esconde */
   @media (max-width: 1023px){
-    .hero > .wrap::before{ display:none; }
+    .hero > .wrap::before,
+    .hero > .wrap::after{ display:none; }
+    /* 5 colunas ficariam estreitas demais aqui */
+    .team-grid{ grid-template-columns:repeat(3, 1fr); }
   }
   .hero-tag{
     display:flex;
@@ -514,6 +667,9 @@
   .hero p.lede{
     max-width:520px;
     margin-top:28px;
+    /* o navegador dá 1em (17px) de margem embaixo de todo <p>; sem zerar,
+       o espaço até os botões virava 45px contra os 28px de cima */
+    margin-bottom:0;
     font-size:17px;
     line-height:1.6;
     color:var(--paper-dim);
@@ -521,16 +677,58 @@
     animation:rise 0.7s cubic-bezier(.2,.7,.3,1) forwards;
     animation-delay:0.36s;
   }
+  /* os dois viraram uma coluna: o botão em cima e, embaixo, o "Ver projetos"
+     desenhado como árvore de diretórios */
   .hero-actions{
-    margin-top:38px;
+    margin-top:28px; /* mesmo ritmo do espaço acima (.hero-tag → h1 → .lede) */
     display:flex;
-    gap:16px;
-    align-items:center;
+    flex-direction:column;
+    gap:18px;
+    align-items:flex-start;
     opacity:0;
     animation:rise 0.7s cubic-bezier(.2,.7,.3,1) forwards;
     animation-delay:0.46s;
   }
   .hero-actions .mono{ color:var(--paper-dim); }
+
+  /* ---------- "VER PROJETOS" EM ÁRVORE ----------
+     Entra depois do botão de cima (o .hero-actions inteiro aparece em
+     0,46s; esta linha só em 1,2s) e, quando ela já está na tela, o
+     sublinhado se desenha da esquerda pra direita — mesma ideia do
+     marca-texto do resto do site. */
+  /* nasce mais pra direita e, depois de aparecer, escorrega de leve pra
+     esquerda. Os dois movimentos ficam no mesmo keyframe de propósito:
+     duas animações mexendo em transform ao mesmo tempo brigariam */
+  .hero-tree{
+    display:flex;
+    margin-left:52px;
+    opacity:0;
+    animation:tree-enter 1.5s 1.2s forwards;
+  }
+  @keyframes tree-enter{
+    0%  { opacity:0; transform:translateX(16px); animation-timing-function:cubic-bezier(.2,.7,.3,1); }
+    30% { opacity:1; transform:translateX(16px); animation-timing-function:cubic-bezier(.16,1,.3,1); }
+    100%{ opacity:1; transform:translateX(0); }
+  }
+  .hero-tree__link{
+    display:inline-flex;
+    align-items:baseline;
+    gap:10px;
+    font-size:15px;
+    font-weight:600;
+    color:var(--paper);
+  }
+  .hero-tree__branch{ color:var(--orange); }
+  .hero-tree__label{
+    background-image:linear-gradient(var(--orange), var(--orange));
+    background-repeat:no-repeat;
+    background-position:0 100%;
+    background-size:0% 2px;
+    padding-bottom:2px;
+    animation:tree-underline 0.55s cubic-bezier(.16,1,.3,1) 1.9s forwards;
+  }
+  @keyframes tree-underline{ to{ background-size:100% 2px; } }
+  .hero-tree__link:hover .hero-tree__label{ color:var(--orange); }
 
   /* marquee */
   .marquee-wrap{
@@ -678,6 +876,26 @@
     margin:0;
     scroll-snap-align:start;
   }
+  /* slide de placeholder: mesma proporção das fotos, com contorno
+     tracejado pra ler como "espaço reservado" e não como projeto real */
+  .carousel-placeholder{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    aspect-ratio:16 / 10;
+    padding:0 28px;
+    background:var(--panel);
+    box-shadow:inset 0 0 0 1px var(--line);
+    text-align:center;
+  }
+  .carousel-placeholder p{
+    margin:0;
+    font-size:15px;
+    color:var(--paper-dim);
+  }
+
   .carousel-slide img,
   .carousel-slide video{
     display:block;
@@ -712,7 +930,7 @@
     width:52px; height:72px;
     padding:0;
     border:0;
-    background:transparent;
+    background:transparent; /* vidro só aparece no hover, ver .carousel-btn:hover */
     color:var(--orange);
     display:flex;
     align-items:center;
@@ -732,8 +950,17 @@
   /* estica pra fora: a seta de voltar cresce pra esquerda, a de avançar pra direita */
   .carousel-btn--prev svg{ transform-origin:right center; }
   .carousel-btn--next svg{ transform-origin:left center; }
+  /* no hover a seta ganha uma pastilha de vidro por baixo, pra ler bem
+     mesmo sobre uma foto clara */
   .carousel-btn:hover:not(:disabled),
-  .carousel-btn:focus-visible{ opacity:1; }
+  .carousel-btn:focus-visible{
+    opacity:1;
+    background:var(--glass-bg);
+    backdrop-filter:var(--glass-blur);
+    -webkit-backdrop-filter:var(--glass-blur);
+    box-shadow:var(--glass-sheen);
+    border-radius:999px;
+  }
   .carousel-btn:hover:not(:disabled) svg,
   .carousel-btn:focus-visible svg{
     animation:arrow-stretch 0.5s cubic-bezier(.2,.7,.3,1) 1;
@@ -894,6 +1121,71 @@
   .project-info h3{ font-size:24px; color:var(--paper); font-family:'Inter',sans-serif; font-weight:700; margin-bottom:8px; }
   .project-info p{ font-size:13.5px; color:var(--paper-dim); line-height:1.55; }
 
+  /* ---------- EQUIPE ----------
+     As fotos vêm com enquadramentos e fundos diferentes (uma de escritório
+     com fundo claro, duas de estúdio com fundo preto). O recorte 4:5 fixo +
+     preto e branco uniformizam as três; a cor volta no hover. */
+  .team-grid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:20px;
+  }
+  .team-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    overflow:hidden;
+    transition:border-color 0.25s ease;
+  }
+  .team-card:hover{ border-color:var(--orange); }
+  .team-photo{
+    aspect-ratio:4 / 5;
+    background:var(--panel-2);
+    overflow:hidden;
+  }
+  .team-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center 15%; /* o rosto fica no terço de cima nas três */
+    filter:grayscale(1) contrast(1.05) brightness(0.92);
+    transition:filter 0.35s ease, transform 0.35s ease;
+  }
+  .team-card:hover .team-photo img{
+    filter:grayscale(0) contrast(1) brightness(1);
+    transform:scale(1.03);
+  }
+  /* card de quem ainda não tirou foto: iniciais no lugar da imagem */
+  .team-photo--empty{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:
+      linear-gradient(180deg, var(--orange-glow), transparent 60%),
+      var(--panel-2);
+    box-shadow:inset 0 0 0 1px var(--line);
+  }
+  .team-initials{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:54px;
+    line-height:1;
+    color:var(--orange);
+  }
+  .team-soon{ color:var(--paper-dim); font-size:11px; letter-spacing:0.4px; }
+  .team-info{
+    padding:18px 20px 22px;
+    border-top:1px solid var(--line);
+  }
+  .team-info .mono{ display:block; margin-bottom:8px; }
+  .team-info h3{
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:20px;
+    color:var(--paper);
+  }
+
   /* ---------- PRICING ---------- */
   .plan-grid{
     display:grid;
@@ -977,7 +1269,10 @@
   .plan-toggle{
     position:relative;
     display:flex;
-    background:var(--black);
+    background:var(--glass-bg);
+    backdrop-filter:var(--glass-blur);
+    -webkit-backdrop-filter:var(--glass-blur);
+    box-shadow:var(--glass-sheen);
     border:1px solid var(--line);
     border-radius:999px;
     padding:4px;
@@ -1079,8 +1374,21 @@
     background:var(--orange);
     color:var(--on-orange);
     border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  /* fundo de ondas de formas (ctaWaves.js): grade de quadrados, círculos e
+     triângulos definida por ruído, com ondas saindo de onde o mouse passa */
+  .cta-waves{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    pointer-events:none;
   }
   .cta-final .wrap{
+    position:relative;
+    z-index:1;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -1092,12 +1400,17 @@
     color:var(--on-orange);
     max-width:640px;
   }
+  /* na faixa laranja o vidro é escuro, senão o branco sumiria no fundo */
   .cta-final .btn{
     border-color:var(--on-orange);
     color:var(--on-orange);
+    background:rgba(14,13,12,0.10);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.18);
     white-space:nowrap;
   }
-  .cta-final .btn:hover{ background:var(--on-orange); color:var(--orange); }
+  /* branco fixo, e não var(--paper): esse token vira escuro no tema claro, e
+     aqui o fundo do hover é escuro nos dois temas */
+  .cta-final .btn:hover{ background:var(--on-orange); color:#F2EFE9; }
   .cta-final .side{ display:flex; flex-direction:column; gap:14px; align-items:flex-start; }
   .cta-final .contact-line{ font-family:'JetBrains Mono', monospace; font-size:13px; color:#3a1a0c; }
 
@@ -1214,6 +1527,9 @@
     display:grid;
     grid-template-columns:280px 1fr;
     gap:40px;
+    /* alinha a primeira linha da resposta com a da pergunta, mesmo com
+       tamanhos e entrelinhas diferentes entre o h3 e o p */
+    align-items:baseline;
     padding:28px 0;
     border-bottom:1px solid var(--line);
   }
@@ -1223,7 +1539,9 @@
     font-size:17px;
     color:var(--paper);
   }
-  .faq-item p{ font-size:14.5px; color:var(--paper-dim); line-height:1.65; max-width:560px; }
+  /* margin:0 zera a margem que o navegador dá a todo <p> e que empurrava a
+     resposta pra baixo em relação à pergunta */
+  .faq-item p{ margin:0; font-size:14.5px; color:var(--paper-dim); line-height:1.65; max-width:560px; }
 
   /* ---------- SCROLL REVEAL ---------- */
   .reveal{
@@ -1315,6 +1633,11 @@
     }
     .project-grid{ grid-template-columns:1fr 1fr; }
     .plan-grid{ grid-template-columns:1fr; max-width:520px; }
+    /* duas colunas mesmo no celular: em uma só, a foto 4:5 ficaria enorme */
+    .team-grid{ grid-template-columns:1fr 1fr; gap:16px; }
+    .team-initials{ font-size:40px; }
+    .team-info{ padding:14px 14px 18px; }
+    .team-info h3{ font-size:17px; }
     .deliverables{ grid-template-columns:1fr; gap:36px; }
     .cta-final .wrap{ flex-direction:column; align-items:flex-start; }
     .foot-links{ gap:34px; }
@@ -1324,7 +1647,7 @@
   }
   @media (max-width: 560px){
     .wrap{ padding:0 20px; }
-    .hero{ padding:150px 0 70px; }
+    .hero{ padding:92px 0 0; }
     .project-grid{ grid-template-columns:1fr; }
     .foot-top{ flex-direction:column; }
   }
