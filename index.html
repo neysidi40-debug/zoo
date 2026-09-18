@@ -38,9 +38,32 @@
   // aplica o tema salvo antes de a página pintar, pra não piscar escuro→claro
   // (a bolinha que troca o tema fica no themeSwitch.js)
   try { if (localStorage.getItem('zoo-theme') === 'light') document.documentElement.classList.add('theme-light'); } catch (e) {}
+
+  // a tela de abertura roda em TODO carregamento. A classe entra aqui, e
+  // não no introLoader.js, porque precisa valer antes da primeira pintura:
+  // é ela que segura as animações do hero enquanto o véu está no ar.
+  document.documentElement.classList.add('intro-on');
 </script>
 </head>
 <body>
+
+<!-- tela de abertura: cobre a página, dá a piscada e sai sozinha (ver
+     introLoader.js). Quem decide se ela aparece nesta sessão é o script
+     inline do <head>, que roda antes da primeira pintura. -->
+<div class="intro-veil" id="introVeil" aria-hidden="true">
+  <canvas class="intro-veil__canvas" id="introCanvas"></canvas>
+  <!-- a logo entra em três tempos: Z, O e o rostinho. São fatias da mesma
+       arte (o PNG foi cortado nos vãos entre os elementos), empilhadas no
+       mesmo lugar. Só a intro usa estas fatias — o hero segue com a logo
+       inteira. As duas últimas são o rosto de olhos abertos e o piscando. -->
+  <div class="intro-logo">
+    <img class="intro-logo__z" src="zoo-z.png" alt="">
+    <img class="intro-logo__o" src="zoo-o.png" alt="">
+    <img class="intro-logo__face intro-logo__face--open" src="zoo-face-open.png" alt="">
+    <img class="intro-logo__face intro-logo__face--wink" src="zoo-face-wink.png" alt="">
+  </div>
+</div>
+<script src="introLoader.js"></script>
 
 <a class="skip-link" href="#top">Pular para o conteúdo</a>
 
@@ -79,17 +102,14 @@
       ZOO
     </a>
     <nav class="nav-links" aria-label="Navegação principal">
-      <a href="#servicos">Serviços</a>
       <a href="#processo">Processo</a>
-      <a href="#projetos">Projetos</a>
+      <a href="#servicos">Serviços</a>
+      <!-- <a href="#projetos">Projetos</a> volta com a section -->
       <a href="#time">Time</a>
       <a href="#precos">Preços</a>
       <a href="#contato">Contato</a>
     </nav>
     <a class="btn btn-solid nav-cta" href="#contato">Iniciar projeto</a>
-    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobileNav">
-      <span></span><span></span><span></span>
-    </button>
   </div>
   <!-- bolinha do header compacto (desktop) — ver headerScroll.js -->
   <button class="nav-bubble" type="button" aria-label="Voltar ao topo">
@@ -99,16 +119,33 @@
       <circle cx="50" cy="56" r="36" fill="var(--orange)"/>
     </svg>
   </button>
-  <nav class="mobile-nav" id="mobileNav" aria-label="Navegação mobile">
-    <a href="#servicos">Serviços</a>
+</header>
+
+<!-- Hambúrguer e painel do menu: ficam FORA do <header> de propósito. A
+     barra encolhe até virar bolinha no primeiro scroll, e o backdrop-filter
+     dela cria bloco de contenção — qualquer position:fixed lá dentro seria
+     arrastado e cortado junto com o morph. Aqui os dois ficam parados no
+     lugar. Ver headerScroll.js e style.css. -->
+<button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobileNav">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- o que sobra da tela quando o painel abre: desfoque por cima da
+     página, e tocar nele fecha o menu -->
+<div class="nav-scrim" id="navScrim"></div>
+
+<nav class="mobile-nav" id="mobileNav" aria-label="Navegação mobile">
+  <div class="mobile-nav__splash" aria-hidden="true"></div>
+  <div class="mobile-nav__items">
     <a href="#processo">Processo</a>
-    <a href="#projetos">Projetos</a>
+    <a href="#servicos">Serviços</a>
+    <!-- <a href="#projetos">Projetos</a> volta com a section -->
     <a href="#time">Time</a>
     <a href="#precos">Preços</a>
     <a href="#contato">Contato</a>
     <a class="btn btn-solid" href="#contato">Iniciar projeto</a>
-  </nav>
-</header>
+  </div>
+</nav>
 
 <main id="top">
 
@@ -124,7 +161,9 @@
       <h1>
         <span>Bonitos de ver,</span>
         <span class="l2">fáceis de usar,</span>
-        <span class="l3">feitos pra <span class="typed-word" data-words="crescer|vender|durar" aria-hidden="true">crescer</span><span class="sr-only">crescer</span>.</span>
+        <!-- o ponto final vem ANTES do cursor: ele faz parte da frase, o
+             cursor é só o traço piscando no fim dela -->
+        <span class="l3">feitos pra <span class="typed-word" data-words="crescer|vender|durar" aria-hidden="true">crescer</span><span aria-hidden="true">.</span><span class="typed-caret" aria-hidden="true"></span><span class="sr-only">crescer.</span></span>
       </h1>
       <p class="lede">Projetamos e construímos o site do seu negócio do zero — estrutura, design e conteúdo pensados para <mark class="ink">transformar visita em cliente</mark>, não apenas para ficar bonito parado.</p>
       <div class="hero-actions">
@@ -141,7 +180,7 @@
         <!-- "Ver projetos" em forma de árvore de diretórios; o sublinhado
              se desenha sozinho depois que a linha aparece (ver style.css) -->
         <div class="hero-tree">
-          <a class="hero-tree__link" href="#projetos">
+          <a class="hero-tree__link" href="#servicos">
             <span class="hero-tree__branch mono" aria-hidden="true">└──</span>
             <span class="hero-tree__label">Ver projetos</span>
           </a>
@@ -153,6 +192,81 @@
       <div class="marquee">
         <span>RESTAURANTES</span><span>LOJAS</span><span>CLÍNICAS</span><span>ESCRITÓRIOS</span><span>OFICINAS</span><span>ESTÚDIOS</span><span>PRESTADORES DE SERVIÇO</span>
         <span>RESTAURANTES</span><span>LOJAS</span><span>CLÍNICAS</span><span>ESCRITÓRIOS</span><span>OFICINAS</span><span>ESTÚDIOS</span><span>PRESTADORES DE SERVIÇO</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRESCIMENTO — texto + gráfico (adaptado do hero do Lidera360, sem as
+       pílulas flutuantes). A curva é ilustrativa, não é dado de cliente. -->
+  <section class="growth">
+    <div class="wrap growth-grid">
+      <div class="growth-text reveal">
+        <span class="mono">POR QUE IMPORTA</span>
+        <h2>Quem não é achado,<br>não é contratado.</h2>
+        <p>Hoje quase toda procura por serviço <mark class="ink">começa no Google ou numa rede social</mark>. Sem um site próprio, seu negócio <mark class="ink">depende só de indicação</mark> — e fica de fora quando o cliente compara as opções.</p>
+        <p>Um site bem feito <mark class="ink">trabalha enquanto você atende</mark>: responde as dúvidas de sempre, mostra o que você faz e <span class="uline">leva a conversa direto pro WhatsApp</span>.</p>
+      </div>
+
+      <div class="growth-chart reveal">
+        <div class="chart-panel">
+          <svg class="chart-plot" viewBox="0 0 560 340" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="zooChartFill" x1="0" y1="0" x2="0" y2="1">
+                <stop class="chart-stop-a" offset="0"/>
+                <stop class="chart-stop-b" offset=".62"/>
+                <stop class="chart-stop-c" offset="1"/>
+              </linearGradient>
+              <!-- a cortina que revela o gráfico da esquerda pra direita -->
+              <clipPath id="zooChartWipe">
+                <rect class="chart-wipe" x="0" y="0" width="560" height="340"/>
+              </clipPath>
+            </defs>
+            <g class="chart-grid">
+              <path d="M112 0V340M224 0V340M336 0V340M448 0V340" vector-effect="non-scaling-stroke"/>
+              <path d="M0 68H560M0 136H560M0 204H560M0 272H560" vector-effect="non-scaling-stroke"/>
+            </g>
+            <g clip-path="url(#zooChartWipe)">
+              <path class="chart-area" d="M0 250 L4.8 252.5 L9.7 250 L14.5 253.2 L19.3 254.2 L24.1 249.6 L29 252.1 L33.8 252.3 L38.6 254 L43.4 251.8 L48.3 251.1 L53.1 251.1 L57.9 252.1 L62.8 253.4 L67.6 248.6 L72.4 248.9 L77.2 252.7 L82.1 248.7 L86.9 252.1 L91.7 248 L96.6 247.2 L101.4 246.4 L106.2 247.1 L111 247.9 L115.9 246.6 L120.7 250 L125.5 247.8 L130.3 245.1 L135.2 244.1 L140 242 L144.8 247.2 L149.7 245.2 L154.5 241.8 L159.3 241.4 L164.1 238.9 L169 240.5 L173.8 240.2 L178.6 239.6 L183.4 231.9 L188.3 237.6 L193.1 229.7 L197.9 231.4 L202.8 231.2 L207.6 227.9 L212.4 220.9 L217.2 223.7 L222.1 226.3 L226.9 220 L231.7 224.2 L236.6 245.8 L241.4 223.2 L246.2 216 L251 215.5 L255.9 220.6 L260.7 219 L265.5 217.2 L270.3 219.6 L275.2 216.3 L280 217.7 L284.8 212.4 L289.7 214.8 L294.5 205.9 L299.3 215 L304.1 203.3 L309 213 L313.8 200.9 L318.6 201.8 L323.4 208.7 L328.3 202.6 L333.1 200.6 L337.9 193.4 L342.8 197.8 L347.6 192.6 L352.4 187.9 L357.2 193.8 L362.1 191.3 L366.9 189.7 L371.7 214.6 L376.6 180.7 L381.4 177.2 L386.2 179.3 L391 180.3 L395.9 172.5 L400.7 171.2 L405.5 171.4 L410.3 176.4 L415.2 175.3 L420 170.7 L424.8 161.7 L429.7 157 L434.5 162 L439.3 147.5 L444.1 153.8 L449 143.8 L453.8 143.3 L458.6 136.6 L463.4 134.6 L468.3 125.9 L473.1 120.6 L477.9 121.8 L482.8 115.3 L487.6 117.4 L492.4 102.9 L497.2 112.4 L502.1 99.6 L506.9 91.4 L511.7 96.3 L516.6 94.2 L521.4 89.7 L526.2 86.1 L531 89.9 L535.9 82.3 L540.7 84.6 L545.5 79 L550.3 73 L555.2 78 L560 70 L560 340 L0 340 Z"/>
+              <path class="chart-line" vector-effect="non-scaling-stroke" d="M0 250 L4.8 252.5 L9.7 250 L14.5 253.2 L19.3 254.2 L24.1 249.6 L29 252.1 L33.8 252.3 L38.6 254 L43.4 251.8 L48.3 251.1 L53.1 251.1 L57.9 252.1 L62.8 253.4 L67.6 248.6 L72.4 248.9 L77.2 252.7 L82.1 248.7 L86.9 252.1 L91.7 248 L96.6 247.2 L101.4 246.4 L106.2 247.1 L111 247.9 L115.9 246.6 L120.7 250 L125.5 247.8 L130.3 245.1 L135.2 244.1 L140 242 L144.8 247.2 L149.7 245.2 L154.5 241.8 L159.3 241.4 L164.1 238.9 L169 240.5 L173.8 240.2 L178.6 239.6 L183.4 231.9 L188.3 237.6 L193.1 229.7 L197.9 231.4 L202.8 231.2 L207.6 227.9 L212.4 220.9 L217.2 223.7 L222.1 226.3 L226.9 220 L231.7 224.2 L236.6 245.8 L241.4 223.2 L246.2 216 L251 215.5 L255.9 220.6 L260.7 219 L265.5 217.2 L270.3 219.6 L275.2 216.3 L280 217.7 L284.8 212.4 L289.7 214.8 L294.5 205.9 L299.3 215 L304.1 203.3 L309 213 L313.8 200.9 L318.6 201.8 L323.4 208.7 L328.3 202.6 L333.1 200.6 L337.9 193.4 L342.8 197.8 L347.6 192.6 L352.4 187.9 L357.2 193.8 L362.1 191.3 L366.9 189.7 L371.7 214.6 L376.6 180.7 L381.4 177.2 L386.2 179.3 L391 180.3 L395.9 172.5 L400.7 171.2 L405.5 171.4 L410.3 176.4 L415.2 175.3 L420 170.7 L424.8 161.7 L429.7 157 L434.5 162 L439.3 147.5 L444.1 153.8 L449 143.8 L453.8 143.3 L458.6 136.6 L463.4 134.6 L468.3 125.9 L473.1 120.6 L477.9 121.8 L482.8 115.3 L487.6 117.4 L492.4 102.9 L497.2 112.4 L502.1 99.6 L506.9 91.4 L511.7 96.3 L516.6 94.2 L521.4 89.7 L526.2 86.1 L531 89.9 L535.9 82.3 L540.7 84.6 L545.5 79 L550.3 73 L555.2 78 L560 70"/>
+            </g>
+          </svg>
+          <p class="chart-caption mono">CRESCIMENTO ILUSTRATIVO</p>
+        </div>
+        <!-- fica FORA do painel: o painel corta o que passa da borda, e a
+             bolinha precisa aparecer inteira em cima dela -->
+        <span class="chart-head" aria-hidden="true"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="processo">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <h2>Como o projeto<br>anda</h2>
+        <p class="note">Quatro etapas, sempre com você acompanhando — <mark class="ink">sem sumiço e sem surpresa na entrega</mark>.</p>
+      </div>
+      <div class="process-line stagger">
+        <div class="step reveal">
+          <div class="step-marker">01</div>
+          <h3>Diagnóstico</h3>
+          <p>Entendemos seu negócio, seu cliente e o que o site precisa fazer por você.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-marker">02</div>
+          <h3>Design</h3>
+          <p>Layout e identidade visual próprios, <mark class="ink">aprovados com você antes de programar</mark>.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-marker">03</div>
+          <h3>Desenvolvimento</h3>
+          <p>Construção do site, testado em celular, tablet e computador.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-marker">04</div>
+          <h3>Lançamento</h3>
+          <p>Site no ar, domínio configurado e você treinado para usar o painel.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -272,39 +386,11 @@
     </div>
   </section>
 
-  <!-- PROCESS -->
-  <section id="processo">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <h2>Como o projeto<br>anda</h2>
-        <p class="note">Quatro etapas, sempre com você acompanhando — <mark class="ink">sem sumiço e sem surpresa na entrega</mark>.</p>
-      </div>
-      <div class="process-line stagger">
-        <div class="step reveal">
-          <div class="step-marker">01</div>
-          <h3>Diagnóstico</h3>
-          <p>Entendemos seu negócio, seu cliente e o que o site precisa fazer por você.</p>
-        </div>
-        <div class="step reveal">
-          <div class="step-marker">02</div>
-          <h3>Design</h3>
-          <p>Layout e identidade visual próprios, <mark class="ink">aprovados com você antes de programar</mark>.</p>
-        </div>
-        <div class="step reveal">
-          <div class="step-marker">03</div>
-          <h3>Desenvolvimento</h3>
-          <p>Construção do site, testado em celular, tablet e computador.</p>
-        </div>
-        <div class="step reveal">
-          <div class="step-marker">04</div>
-          <h3>Lançamento</h3>
-          <p>Site no ar, domínio configurado e você treinado para usar o painel.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- PROJECTS — fora do ar até termos clientes de verdade. Os cards
+       abaixo são exemplos inventados; no ar, eles afirmam que já
+       entregamos esses trabalhos. Pra voltar: descomentar daqui até o
+       fechamento da section e reativar os links "Projetos" nos menus.
 
-  <!-- PROJECTS -->
   <section class="projects" id="projetos">
     <div class="wrap">
       <div class="sec-head reveal">
@@ -395,6 +481,7 @@
       </div>
     </div>
   </section>
+  -->
 
   <!-- TEAM — cargos abaixo são provisórios, ajustar com os nomes reais.
        Dharlan ainda sem foto: o card usa o bloco de iniciais. -->
@@ -453,7 +540,7 @@
             <img src="fotos-integrantes/sidi.png" alt="Sidi" loading="lazy" width="1024" height="1536" draggable="false">
           </div>
           <div class="team-info">
-            <span class="mono">SUPORTE</span>
+            <span class="mono">CTO</span>
             <h3>Sidi</h3>
           </div>
         </div>
@@ -543,7 +630,10 @@
     </div>
   </section>
 
-  <!-- TESTIMONIALS -->
+  <!-- TESTIMONIALS — fora do ar junto com os projetos: os três
+       depoimentos e os nomes de empresa abaixo são inventados. Volta
+       quando houver cliente real pra citar (com autorização do nome).
+
   <section class="testimonials">
     <div class="wrap">
       <div class="sec-head reveal">
@@ -575,9 +665,10 @@
       </div>
     </div>
   </section>
+  -->
 
   <!-- DELIVERABLES -->
-  <section>
+  <section class="panel-band">
     <div class="wrap deliverables">
       <div class="reveal">
         <h2>O que vem<br>junto do site</h2>
@@ -634,7 +725,7 @@
       <h2 class="reveal">Vamos construir<br>o site do seu negócio.</h2>
       <div class="side reveal">
         <a class="btn" href="https://wa.me/5581900000000?text=Ol%C3%A1!%20Quero%20um%20or%C3%A7amento%20de%20site." target="_blank" rel="noopener">Chamar no WhatsApp</a>
-        <span class="contact-line">koalasuporte@gmail.com</span>
+        <span class="contact-line">zooseusite@gmail.com</span>
       </div>
     </div>
   </section>
@@ -658,9 +749,11 @@
       <div class="foot-links">
         <div class="foot-col">
           <strong>Navegação</strong>
-          <a href="#servicos">Serviços</a>
           <a href="#processo">Processo</a>
-          <a href="#projetos">Projetos</a>
+          <a href="#servicos">Serviços</a>
+          <!-- <a href="#projetos">Projetos</a> volta com a section -->
+          <a href="#time">Time</a>
+          <a href="#precos">Preços</a>
         </div>
         <div class="foot-col">
           <strong>Contato</strong>

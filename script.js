@@ -26,19 +26,21 @@
   // Mobile menu toggle
   const menuToggle = document.getElementById('menuToggle');
   const mobileNav = document.getElementById('mobileNav');
-  menuToggle.addEventListener('click', () => {
-    const isOpen = mobileNav.classList.toggle('open');
-    menuToggle.classList.toggle('open', isOpen);
-    menuToggle.setAttribute('aria-expanded', String(isOpen));
-    menuToggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
-  });
+  const setMenu = (open) => {
+    mobileNav.classList.toggle('open', open);
+    menuToggle.classList.toggle('open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+    menuToggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+  };
+  menuToggle.addEventListener('click', () => setMenu(!mobileNav.classList.contains('open')));
   mobileNav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      mobileNav.classList.remove('open');
-      menuToggle.classList.remove('open');
-      menuToggle.setAttribute('aria-expanded', 'false');
-      menuToggle.setAttribute('aria-label', 'Abrir menu');
-    });
+    link.addEventListener('click', () => setMenu(false));
+  });
+  // o painel cobre só a faixa da direita: tocar no borrão do lado fecha
+  const navScrim = document.getElementById('navScrim');
+  if (navScrim) navScrim.addEventListener('click', () => setMenu(false));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') setMenu(false);
   });
 
   // Highlight active section link while scrolling

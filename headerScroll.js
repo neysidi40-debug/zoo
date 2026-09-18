@@ -1,13 +1,15 @@
 /* ============================================================
-   ZOO — Header compacto (desktop)
+   ZOO — Header compacto
    ============================================================
    No topo da página a nav fica aberta, unida ao grid da hero.
    No primeiro scroll ela encolhe até virar uma bolinha no canto
    superior esquerdo só com o coala; clicar na bolinha volta ao topo.
    Voltando ao topo, ela abre de novo.
 
-   Só vale no desktop (> 860px). No mobile a nav tem o menu
-   hambúrguer, então continua do jeito normal.
+   Vale nos dois tamanhos; muda só a medida final da bolinha. No mobile
+   o hambúrguer não se recolhe junto: ele mora fora do <header> no HTML
+   e fica parado no canto, senão o menu ficaria inalcançável depois do
+   primeiro scroll.
 
    Por que a animação é feita em JS e não com CSS transition:
    animar width/height/border-radius junto com overflow:hidden via
@@ -29,10 +31,15 @@
     .filter(Boolean);
 
   const TRIGGER  = 10;   // px de scroll pra compactar ("primeiro scroll")
-  const SIZE     = 64;   // diâmetro final da bolinha (mesmo da bolinha de tema)
-  const TOP      = 16;   // distância final do topo
-  const LEFT     = 20;   // distância final da esquerda
   const DURATION = 350;  // ms
+  /* diâmetro, topo e esquerda finais da bolinha. No desktop batem com a
+     bolinha de tema (64px). No mobile os 16px são o mesmo recuo que a
+     bolinha de tema usa lá embaixo: os três controles flutuantes ficam
+     todos à mesma distância da borda da tela. */
+  const GEOM = {
+    desktop: { size: 64, top: 16, left: 20 },
+    mobile:  { size: 56, top: 16, left: 16 }
+  };
   // cores da bolinha vêm do CSS (--float-bg-rgb / --float-line-rgb),
   // pra acompanharem o tema claro/escuro
   const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -76,6 +83,7 @@
 
     const fullWidth = document.documentElement.clientWidth;
     const compact = r >= 0.995;
+    const { size: SIZE, top: TOP, left: LEFT } = desktop.matches ? GEOM.desktop : GEOM.mobile;
 
     header.style.right = 'auto';
     header.style.width = `${lerp(fullWidth, SIZE, r)}px`;
@@ -127,7 +135,7 @@
     if (rafId === null) rafId = requestAnimationFrame(step);
   }
 
-  const wanted = () => (desktop.matches && window.scrollY > TRIGGER) ? 1 : 0;
+  const wanted = () => window.scrollY > TRIGGER ? 1 : 0;
 
   let ticking = false;
   window.addEventListener('scroll', () => {
@@ -142,8 +150,8 @@
     applyFrame(ratio);
   }, { passive: true });
 
-  // trocou pra mobile com a bolinha aberta (ou o contrário): pula direto pro estado certo
-  desktop.addEventListener('change', () => { measure(); animateTo(wanted(), true); });
+  // trocou de faixa de tamanho: pula direto pro estado certo, com a medida nova
+  desktop.addEventListener('change', () => { measure(); applyFrame(ratio); animateTo(wanted(), true); });
 
   bubble.addEventListener('click', () => {
     window.scrollTo({ top: 0 }); // o html já tem scroll-behavior: smooth
