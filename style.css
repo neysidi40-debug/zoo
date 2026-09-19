@@ -102,14 +102,26 @@
     background:#FF7A1A;
     color:var(--on-orange);
   }
-  html.ink-selection ::selection{
+  /* Com o traço ligado a seleção nativa some, mas a COR do texto precisa
+     ser dita aqui, e não com `inherit`: a color de um ::selection herda do
+     ::selection do elemento PAI, não do próprio texto. Com inherit a cadeia
+     subia até html::selection, que cai na regra de reserva acima — texto
+     escuro, pra ficar legível sobre o laranja dela. Era daí que vinha o
+     preto durante o arraste, e ele continuava depois de soltar.
+     A raiz entra na lista pra a cadeia inteira começar já na cor certa. */
+  html.ink-selection ::selection,
+  html.ink-selection::selection{
     background:transparent;
-    color:inherit;
+    color:var(--paper);
   }
-  html.ink-selection ::-moz-selection{
+  html.ink-selection ::-moz-selection,
+  html.ink-selection::-moz-selection{
     background:transparent;
-    color:inherit;
+    color:var(--paper);
   }
+  /* na faixa laranja o texto do site já é escuro */
+  html.ink-selection .cta-final ::selection{ color:var(--on-orange); }
+  html.ink-selection .cta-final ::-moz-selection{ color:var(--on-orange); }
   /* o "traço" da seleção é um ::highlight (CSS Custom Highlight API):
      pinta ATRÁS das letras, igual à seleção nativa, então o texto nunca
      some. Só muda o fundo — a cor do texto continua a original, por isso
@@ -2053,7 +2065,55 @@
   }
   @media (max-width: 560px){
     .wrap{ padding:0 20px; }
+    /* o cabeçalho de seção deixa de ser duas colunas. No telefone o h2 e o
+       texto ao lado disputam a mesma linha — os dois ficam espremidos e,
+       porque o alinhamento é pelo rodapé (align-items:flex-end), cada um
+       começa numa altura diferente. Empilhados, começam os dois na mesma
+       margem. O align-items precisa ir junto: em coluna ele passa a valer
+       na horizontal, e flex-end jogaria tudo pra direita. */
+    .sec-head{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:40px;
+    }
+    /* a largura e o respiro do rodapé só existiam pra coluna estreita */
+    .sec-head .note{ max-width:none; padding-bottom:0; }
     .hero{ padding:92px 0 0; }
     .project-grid{ grid-template-columns:1fr; }
     .foot-top{ flex-direction:column; }
+
+    /* ---- a equipe vira letreiro ----
+       Em duas colunas os cartões ficam pequenos demais e a lista come meia
+       tela de rolagem. Passando sozinhos, cada rosto aparece num tamanho
+       que dá pra ver. O movimento e o arraste são do carousel.js — daqui
+       sai só a faixa rolável; as propriedades são as mesmas do .drag-scroll
+       do letreiro da hero. */
+    .team-marquee{
+      overflow-x:auto;
+      overflow-y:hidden;
+      scrollbar-width:none;
+      overscroll-behavior-x:contain;
+      cursor:grab;
+      margin-inline:-20px;   /* sangra até a borda da tela */
+      /* as pontas dissolvem em vez de cortar um cartão no meio */
+      -webkit-mask-image:linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+              mask-image:linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    }
+    .team-marquee::-webkit-scrollbar{ display:none; }
+    .team-marquee.is-dragging{ cursor:grabbing; user-select:none; }
+    .team-grid{
+      display:flex;
+      width:max-content;
+      gap:14px;
+      padding-inline:20px;
+    }
+    .team-card{
+      flex:0 0 auto;
+      width:min(62vw, 230px);
+    }
+    /* o laranja entra no cargo e no fio que separa a foto do nome — sem
+       hover no telefone, é ele que dá a cor do site à faixa */
+    .team-marquee .team-info{ border-top-color:var(--orange); }
+    .team-marquee .team-info .mono{ color:var(--orange); }
   }
