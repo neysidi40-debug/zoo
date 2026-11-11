@@ -154,6 +154,10 @@ void main() {
       radius: num('radius', 18),
       lineColor: hexToRgb(btn.dataset.lineColor || '#ffffff'),
       baseColor: hexToRgb(btn.dataset.baseColor || '#525252'),
+      // tema claro: brilho branco some no creme — usa o laranja do tema
+      // claro (--orange em html.theme-light) e a borda no --line do claro
+      lineColorLight: hexToRgb(btn.dataset.lineColorLight || '#E4531B'),
+      baseColorLight: hexToRgb(btn.dataset.baseColorLight || '#CFC4B1'),
       intensity: num('intensity', 1),
       shineSize: num('shineSize', 10),
       shineFade: num('shineFade', 40),
@@ -237,6 +241,7 @@ void main() {
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
     let running = false;
+    const light = document.documentElement.classList.contains('theme-light');
 
     for (const item of instances){
       if (!item.visible) continue;
@@ -257,8 +262,8 @@ void main() {
       gl.useProgram(item.program);
       gl.uniform1f(item.uniforms.uAngle, item.angle);
       gl.uniform1f(item.uniforms.uRadius, Math.min(p.radius, Math.min(item.w, item.h) / 2) * item.dpr);
-      gl.uniform3fv(item.uniforms.uLineColor, p.lineColor);
-      gl.uniform3fv(item.uniforms.uBaseColor, p.baseColor);
+      gl.uniform3fv(item.uniforms.uLineColor, light ? p.lineColorLight : p.lineColor);
+      gl.uniform3fv(item.uniforms.uBaseColor, light ? p.baseColorLight : p.baseColor);
       gl.uniform1f(item.uniforms.uIntensity, p.intensity * item.bright);
       gl.uniform1f(item.uniforms.uShineSize, (p.shineSize * Math.PI) / 180);
       gl.uniform1f(item.uniforms.uShineFade, (p.shineFade * Math.PI) / 180);
@@ -286,6 +291,9 @@ void main() {
   }
 
   document.addEventListener('visibilitychange', wake);
+  // trocou o tema (themeSwitch.js mexe na classe do <html>): redesenha com as
+  // cores do tema novo — parado, o loop não rodaria até o próximo hover
+  new MutationObserver(wake).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   window.addEventListener('scroll', wake, { passive: true });
   window.addEventListener('resize', wake, { passive: true });
   wake();

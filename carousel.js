@@ -230,9 +230,9 @@
     }
   });
 
-  /* ── carrossel de projetos: vídeo + dica das setas ──
-     O vídeo do slide toca sozinho (mudo, em loop) quando o carrossel
-     aparece na tela e pausa quando sai. Nesse primeiro aparecimento, depois
+  /* ── carrossel de projetos: vídeo + ficha + dica das setas ──
+     O vídeo do slide da vez toca sozinho (mudo, em loop) quando o carrossel
+     aparece na tela e pausa quando sai ou quando a pessoa troca de slide. Nesse primeiro aparecimento, depois
      da entrada do bloco (.reveal) e com o vídeo já mostrando imagem, as
      setas fazem a animação do hover UMA vez (.is-hinting no CSS).
      Com "reduzir movimento", o vídeo não toca sozinho e a dica não roda. */
@@ -264,23 +264,104 @@
       setTimeout(once, VIDEO_WAIT);
     };
 
-    const playAll = () => videos.forEach(v => {
-      // play() pode ser recusado (economia de dados etc.): fica parado no 1º quadro
-      if (!reduceMotion) v.play().catch(() => {});
-    });
+    /* ── só o slide da vez toca ──
+       Cada projeto tem um vídeo de alguns MB: tocar (e baixar) todos de uma
+       vez pesaria à toa. Os vídeos vêm com preload="none" + poster; toca só
+       o do slide que está na tela, e o seguinte começa a carregar antes de
+       a pessoa chegar nele. */
+    const track = box.querySelector('.carousel-track');
+    const slides = track ? Array.from(track.children) : [];
+    const tip = box.querySelector('.work-tip');
+    const tipBody = tip && tip.querySelector('.work-tip__body');
+    let active = 0;
+    let onScreen = false;
+
+    const syncVideos = () => {
+      slides.forEach((slide, i) => {
+        const v = slide.querySelector('video');
+        if (!v) return;
+        // play() pode ser recusado (economia de dados etc.): fica no poster
+        if (i === active && onScreen && !reduceMotion) v.play().catch(() => {});
+        else v.pause();
+      });
+      const next = slides[active + 1] && slides[active + 1].querySelector('video');
+      if (next && next.preload === 'none') next.preload = 'auto';
+      syncPhone();
+    };
+
+    /* ── ficha da esquerda: o mesmo projeto no celular (.work-phone) ──
+       Só os slides com data-phone têm vídeo de celular; nos outros a classe
+       .has-phone sai e o cartão nem aparece. O vídeo só toca enquanto o
+       cartão está à vista (mouse/foco no carrossel, tela larga) — escondido,
+       baixar e tocar seria desperdício. Trocar de projeto recomeça do zero. */
+    const phone = box.querySelector('.work-phone');
+    const phoneVideo = phone && phone.querySelector('video');
+    const phoneWide = window.matchMedia('(hover: hover) and (min-width: 1280px)');
+    let pointerIn = false;
+    function syncPhone(){
+      if (!phoneVideo) return;
+      const slide = slides[active];
+      const src = slide && slide.dataset.phone;
+      box.classList.toggle('has-phone', Boolean(src));
+      if (!src){ phoneVideo.pause(); return; }
+      if (phoneVideo.getAttribute('src') !== src){
+        phoneVideo.poster = slide.dataset.phonePoster || '';
+        phoneVideo.setAttribute('src', src);
+        phoneVideo.setAttribute('aria-label', `Vídeo do site ${slide.querySelector('figcaption span')?.textContent || ''} no celular`);
+      }
+      if (pointerIn && onScreen && phoneWide.matches && !reduceMotion) phoneVideo.play().catch(() => {});
+      else phoneVideo.pause();
+    }
+    const phoneOn = () => { pointerIn = true; syncPhone(); };
+    const phoneOff = () => { pointerIn = false; syncPhone(); };
+    box.addEventListener('mouseenter', phoneOn);
+    box.addEventListener('mouseleave', phoneOff);
+    box.addEventListener('focusin', phoneOn);
+    box.addEventListener('focusout', e => { if (!box.contains(e.relatedTarget)) phoneOff(); });
+
+    /* ── ficha do projeto (.work-tip) ──
+       O texto mora escondido em cada slide (.slide-info); aqui ele é copiado
+       pro cartão, com uma troca rápida de opacidade. Slide sem ficha esconde
+       o cartão. */
+    let swapTimer = null;
+    const fillTip = instant => {
+      if (!tip || !tipBody) return;
+      const info = slides[active] && slides[active].querySelector('.slide-info');
+      tip.hidden = !info;
+      if (!info) return;
+      clearTimeout(swapTimer);
+      if (instant || reduceMotion){ tipBody.innerHTML = info.innerHTML; return; }
+      tip.classList.add('is-swapping');
+      swapTimer = setTimeout(() => {
+        tipBody.innerHTML = info.innerHTML;
+        tip.classList.remove('is-swapping');
+      }, 180);
+    };
+    fillTip(true);
 
     if (!('IntersectionObserver' in window)){
-      playAll();
+      onScreen = true;
+      syncVideos();
       return;
     }
 
+    // slide da vez = o que ocupa mais da metade da faixa
+    const slideObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting || entry.intersectionRatio < 0.6) return;
+        const i = slides.indexOf(entry.target);
+        if (i === -1 || i === active) return;
+        active = i;
+        fillTip(false);
+        syncVideos();
+      });
+    }, { root: track, threshold: 0.6 });
+    slides.forEach(s => slideObserver.observe(s));
+
     new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting){
-        playAll();
-        if (!hinted) setTimeout(() => whenVideoReady(hint), REVEAL_MS);
-      } else {
-        videos.forEach(v => v.pause());
-      }
+      onScreen = entry.isIntersecting;
+      syncVideos();
+      if (onScreen && !hinted) setTimeout(() => whenVideoReady(hint), REVEAL_MS);
     }, { threshold: 0.4 }).observe(box);
   });
 })();

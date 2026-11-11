@@ -29,11 +29,13 @@
 <meta property="og:title" content="Zoo — Estúdio de Sites">
 <meta property="og:description" content="Sites que vendem, não só existem. Construímos o site do seu negócio do zero — design próprio, sem template genérico.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='20' cy='20' r='16' fill='%23FF5A1F'/%3E%3Ccircle cx='80' cy='20' r='16' fill='%23FF5A1F'/%3E%3Ccircle cx='50' cy='56' r='38' fill='%23FF5A1F'/%3E%3Ccircle cx='37' cy='50' r='6' fill='%230E0D0C'/%3E%3Ccircle cx='63' cy='50' r='6' fill='%230E0D0C'/%3E%3Cellipse cx='50' cy='64' rx='12' ry='9' fill='%230E0D0C'/%3E%3C/svg%3E">
+<!-- favicon = o koala do header (.koala-icon), sem rosto -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='20' cy='20' r='15' fill='%23FF5A1F'/%3E%3Ccircle cx='80' cy='20' r='15' fill='%23FF5A1F'/%3E%3Ccircle cx='50' cy='56' r='36' fill='%23FF5A1F'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<!-- ?v= força o navegador a baixar a versão nova (troque o número quando mudar o arquivo) -->
+<link rel="stylesheet" href="style.css?v=5">
 <script>
   // aplica o tema salvo antes de a página pintar, pra não piscar escuro→claro
   // (a bolinha que troca o tema fica no themeSwitch.js)
@@ -338,34 +340,152 @@
         </div>
       </div>
 
-      <!-- carrossel de projetos (arrastável, ver carousel.js) — imagens provisórias -->
+      <!-- carrossel de projetos (arrastável, ver carousel.js).
+           Cada slide: vídeo do site ao vivo (projetos/<nome>.mp4, capa em
+           projetos/<nome>.jpg) + a ficha escondida (.slide-info), que o
+           carousel.js mostra no cartão .work-tip ao passar o mouse.
+           Só o 1º vídeo carrega de cara; os outros têm preload="none" e
+           carregam quando chega a vez deles. -->
       <div class="work-carousel reveal">
+        <div class="carousel-stage">
         <div class="carousel-track drag-scroll" id="workCarousel" data-snap tabindex="0" aria-label="Projetos que já fizemos">
-          <figure class="carousel-slide">
-            <!-- vídeo toca sozinho (mudo) quando o carrossel aparece na tela — ver carousel.js -->
-            <video src="projeto1.mp4" muted loop playsinline preload="metadata" aria-label="Vídeo do Projeto 1"></video>
-            <figcaption><span>Projeto 1</span><span class="mono">DESTAQUE</span></figcaption>
+
+          <figure class="carousel-slide" data-phone="projetos/combo-lanches-celular.mp4" data-phone-poster="projetos/combo-lanches-celular.jpg">
+            <video src="projetos/combo-lanches.mp4" poster="projetos/combo-lanches.jpg" muted loop playsinline preload="auto" aria-label="Vídeo do site da Combo Lanches: hambúrguer montando na rolagem, troca de tema, cardápio, lanche montado com adicionais, sacola, pedido simulado com Pix e rastreio do entregador"></video>
+            <figcaption><span>Combo Lanches</span><span class="mono">CARDÁPIO DIGITAL</span></figcaption>
+            <div class="slide-info" hidden>
+              <span class="mono">CARDÁPIO DIGITAL · 2026</span>
+              <h3>Combo Lanches</h3>
+              <p>Site e cardápio com sacola para uma hamburgueria de Caetés I, em Abreu e Lima (PE). Na home, o hambúrguer se monta conforme você rola. Tem um montador de combo, tema claro e escuro e uma versão própria para o celular.</p>
+              <ul>
+                <li>Hambúrguer que se monta na rolagem</li>
+                <li>Sacola, Pix simulado e rastreio</li>
+                <li>Versão própria para celular</li>
+              </ul>
+              <p class="work-tip__stack mono">React · Vite · Tailwind CSS · Motion · GSAP</p>
+              <a href="https://combo-lanches.vercel.app/" target="_blank" rel="noopener">Ver ao vivo ↗</a>
+            </div>
           </figure>
-          <figure class="carousel-slide">
-            <img src="https://picsum.photos/seed/zoo-autopecas/960/600" alt="Prévia da loja da Auto Peças Bravo" loading="lazy" draggable="false">
-            <figcaption><span>Auto Peças Bravo</span><span class="mono">LOJA VIRTUAL</span></figcaption>
+
+          <figure class="carousel-slide" data-phone="projetos/aluado-celular.mp4" data-phone-poster="projetos/aluado-celular.jpg">
+            <video src="projetos/aluado.mp4" poster="projetos/aluado.jpg" muted loop playsinline preload="none" aria-label="Vídeo da Aluado's Store: abertura da página, boné em 3D girado de frente trocando de estampa, tema escuro, botão segure para comprar e formulário de envio preenchido"></video>
+            <figcaption><span>Aluado's Store</span><span class="mono">LOJA VIRTUAL</span></figcaption>
+            <div class="slide-info" hidden>
+              <span class="mono">LOJA VIRTUAL · 2026</span>
+              <h3>Aluado's Store</h3>
+              <p>Loja de um produto só, para o drop de um boné. O boné aparece em 3D e gira na tela, dá pra trocar a estampa e a compra é feita segurando o botão, com Pix de verdade via Asaas e Supabase. Tem tema claro e escuro.</p>
+              <ul>
+                <li>Boné em 3D com React Three Fiber</li>
+                <li>Pix real via Asaas + Supabase</li>
+                <li>Tema claro e escuro</li>
+              </ul>
+              <p class="work-tip__stack mono">React · Vite · Three.js · Motion · Supabase</p>
+              <a href="https://www.aluado.store/" target="_blank" rel="noopener">Ver ao vivo ↗</a>
+            </div>
           </figure>
+
           <figure class="carousel-slide">
-            <img src="https://picsum.photos/seed/zoo-clinica/960/600" alt="Prévia do sistema da Clínica Vitalis" loading="lazy" draggable="false">
-            <figcaption><span>Clínica Vitalis</span><span class="mono">SISTEMA</span></figcaption>
+            <video src="projetos/garden-brasa.mp4" poster="projetos/garden-brasa.jpg" muted loop playsinline preload="none" aria-label="Vídeo da página de links do Garden Brasa sendo rolada, com troca de tema"></video>
+            <figcaption><span>Garden Brasa</span><span class="mono">LINK NA BIO</span></figcaption>
+            <div class="slide-info" hidden>
+              <span class="mono">LINK NA BIO · 2025</span>
+              <h3>Garden Brasa</h3>
+              <p>Link na bio do Garden Brasa, restaurante no Itanhangá (RJ). Reúne iFood, redes sociais, WhatsApp e mapa com rota numa página só, com tema claro e escuro. Feita sobre o template LittleLink.</p>
+              <ul>
+                <li>iFood, redes e WhatsApp num lugar só</li>
+                <li>Mapa com botão de rota</li>
+                <li>Tema claro e escuro</li>
+              </ul>
+              <p class="work-tip__stack mono">HTML · CSS · JavaScript · LittleLink</p>
+              <a href="https://gardenbrasabio.vercel.app/" target="_blank" rel="noopener">Ver ao vivo ↗</a>
+            </div>
           </figure>
+
+          <figure class="carousel-slide" data-phone="projetos/dharlan-world-celular.mp4" data-phone-poster="projetos/dharlan-world-celular.jpg">
+            <video src="projetos/dharlan-world.mp4" poster="projetos/dharlan-world.jpg" muted loop playsinline preload="none" aria-label="Vídeo do site dharlan.world: home com troca de tema, sobre mim, gerador de kaomoji, criador de avatar, wishlist, contato, 2kki, portfólio, arte, terminal com help, sitemap e exit (a boneca em dither atravessa a tela) e o rádio flutuando na home"></video>
+            <figcaption><span>dharlan.world</span><span class="mono">SITE PESSOAL</span></figcaption>
+            <div class="slide-info" hidden>
+              <span class="mono">SITE PESSOAL · 2026</span>
+              <h3>dharlan.world</h3>
+              <p>Site pessoal e blog do dharlan com estética de web antiga: HTML escrito à mão, ASCII art, galerias, portfólio, página em formato de terminal e vários temas de cor. Tudo sem framework e sem build.</p>
+              <ul>
+                <li>Estética old web feita à mão</li>
+                <li>Página em formato de terminal</li>
+                <li>Vários temas de cor</li>
+              </ul>
+              <p class="work-tip__stack mono">HTML · CSS · JavaScript · Vercel</p>
+              <a href="https://www.dharlan.world/" target="_blank" rel="noopener">Ver ao vivo ↗</a>
+            </div>
+          </figure>
+
+          <figure class="carousel-slide" data-phone="projetos/lidera360-celular.mp4" data-phone-poster="projetos/lidera360-celular.jpg">
+            <video src="projetos/lidera360.mp4" poster="projetos/lidera360.jpg" muted loop playsinline preload="none" aria-label="Vídeo da Lidera360: home com as pills de preço, login, versão logada, menu, dashboard com destaque de trilha, tudo no tema escuro, e o perfil trocando para o tema claro"></video>
+            <figcaption><span>Lidera360</span><span class="mono">PLATAFORMA</span></figcaption>
+            <div class="slide-info" hidden>
+              <span class="mono">PLATAFORMA · SENAC · 2026</span>
+              <h3>Lidera360</h3>
+              <p>Projeto Senac: landing e protótipo de uma plataforma de treinamento corporativo, com trilhas, dashboard do aluno e perfil. HTML, CSS e JS puros, tema claro/escuro e intro animada em WebGL.</p>
+              <ul>
+                <li>Tema claro/escuro com tokens próprios</li>
+                <li>Intro com contador e shader WebGL</li>
+                <li>Sem framework: HTML, CSS e JS puros</li>
+              </ul>
+              <p class="work-tip__stack mono">HTML · CSS · JavaScript · WebGL</p>
+              <a href="https://lidera360-senac.vercel.app/" target="_blank" rel="noopener">Ver ao vivo ↗</a>
+            </div>
+          </figure>
+
           <figure class="carousel-slide">
-            <img src="https://picsum.photos/seed/zoo-lente/960/600" alt="Prévia do portfólio do Estúdio Lente" loading="lazy" draggable="false">
-            <figcaption><span>Estúdio Lente</span><span class="mono">PORTFÓLIO</span></figcaption>
+            <video src="projetos/4bit9d.mp4" poster="projetos/4bit9d.jpg" muted loop playsinline preload="none" aria-label="Vídeo do site 4bit.9d core sendo rolado"></video>
+            <figcaption><span>4bit.9d core</span><span class="mono">SITE PESSOAL</span></figcaption>
+            <div class="slide-info" hidden>
+              <span class="mono">SITE PESSOAL · 2025</span>
+              <h3>4bit.9d core</h3>
+              <p>Site pessoal com cara de terminal: tela de boot, texto digitado ao vivo, arte ASCII e braille em preto e branco e painéis tipo "cat about_me.txt" e "ls -la /social" com os links.</p>
+              <ul>
+                <li>Estética de terminal em preto e branco</li>
+                <li>Arte ASCII/braille digitada ao vivo</li>
+                <li>Tela de boot antes do conteúdo</li>
+              </ul>
+              <p class="work-tip__stack mono">React · TypeScript · Vite · Tailwind CSS</p>
+              <a href="https://4bit9d.vercel.app/" target="_blank" rel="noopener">Ver ao vivo ↗</a>
+            </div>
           </figure>
+
           <figure class="carousel-slide">
-            <img src="https://picsum.photos/seed/zoo-plantas/960/600" alt="Prévia da loja da Casa Verde Plantas" loading="lazy" draggable="false">
-            <figcaption><span>Casa Verde Plantas</span><span class="mono">LOJA VIRTUAL</span></figcaption>
+            <video src="projetos/mitch.mp4" poster="projetos/mitch.jpg" muted loop playsinline preload="none" aria-label="Vídeo da página de links do mitchdapesada sendo rolada"></video>
+            <figcaption><span>mitchdapesada</span><span class="mono">LINK NA BIO</span></figcaption>
+            <div class="slide-info" hidden>
+              <span class="mono">LINK NA BIO · 2025</span>
+              <h3>mitchdapesada</h3>
+              <p>Link na bio de um criador de conteúdo: foto, números das redes, cards com imagem levando pro Twitter, Instagram e YouTube, e botões pra compartilhar. Escuro, direto e no tom zoeiro do perfil.</p>
+              <ul>
+                <li>Contadores das redes logo no topo</li>
+                <li>Cards com imagem para cada canal</li>
+                <li>Botões de compartilhar no rodapé</li>
+              </ul>
+              <p class="work-tip__stack mono">HTML · CSS · JavaScript · Vercel</p>
+              <a href="https://mitchrework.vercel.app/" target="_blank" rel="noopener">Ver ao vivo ↗</a>
+            </div>
           </figure>
+
           <figure class="carousel-slide">
-            <img src="https://picsum.photos/seed/zoo-oficina/960/600" alt="Prévia do sistema da Oficina Torque" loading="lazy" draggable="false">
-            <figcaption><span>Oficina Torque</span><span class="mono">SISTEMA</span></figcaption>
+            <video src="projetos/diverse-bio.mp4" poster="projetos/diverse-bio.jpg" muted loop playsinline preload="none" aria-label="Vídeo da página de links da Diverse sendo rolada, com troca de tema"></video>
+            <figcaption><span>Diverse</span><span class="mono">LINK NA BIO</span></figcaption>
+            <div class="slide-info" hidden>
+              <span class="mono">LINK NA BIO · 2025</span>
+              <h3>Diverse</h3>
+              <p>Página de link na bio da Diverse, marca de bolsas e acessórios artesanais. Reúne Instagram, destaques de modelos e estampas, WhatsApp e e-mail, com galeria de produtos e troca de tema claro/escuro.</p>
+              <ul>
+                <li>Atalhos para Instagram, WhatsApp e e-mail</li>
+                <li>Galeria de produtos em carrossel</li>
+                <li>Tema claro e escuro com um clique</li>
+              </ul>
+              <p class="work-tip__stack mono">HTML · CSS · JavaScript · LittleLink</p>
+              <a href="https://diverseoldbio.vercel.app/" target="_blank" rel="noopener">Ver ao vivo ↗</a>
+            </div>
           </figure>
+
           <!-- placeholder: último slide, reservado pro próximo projeto -->
           <figure class="carousel-slide">
             <div class="carousel-placeholder">
@@ -373,6 +493,12 @@
               <p>Seu site pode ser o próximo aqui.</p>
             </div>
             <figcaption><span>Seu projeto</span><span class="mono">VAGA ABERTA</span></figcaption>
+            <div class="slide-info" hidden>
+              <span class="mono">VAGA ABERTA</span>
+              <h3>Seu projeto</h3>
+              <p>Site, loja ou sistema feito sob medida para o seu negócio, sem template genérico. Conta pra gente o que você precisa.</p>
+              <a href="#contato">Falar sobre o projeto →</a>
+            </div>
           </figure>
         </div>
         <!-- setas dentro do carrossel: bem apagadas, acendem e esticam no hover -->
@@ -382,6 +508,19 @@
         <button type="button" class="carousel-btn carousel-btn--next" data-carousel-next aria-controls="workCarousel" aria-label="Próximo projeto">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18" vector-effect="non-scaling-stroke"/></svg>
         </button>
+        </div>
+        <!-- ficha da esquerda: o projeto da vez no celular (só nos slides com
+             data-phone; só em tela larga com mouse — ver carousel.js/style.css) -->
+        <aside class="work-phone" aria-label="O projeto no celular">
+          <span class="mono">NO CELULAR</span>
+          <div class="work-phone__device">
+            <video muted loop playsinline preload="none"></video>
+          </div>
+        </aside>
+        <!-- ficha do projeto da vez (preenchida pelo carousel.js a partir do .slide-info) -->
+        <aside class="work-tip" aria-live="polite" aria-label="Sobre o projeto">
+          <div class="work-tip__body"></div>
+        </aside>
       </div>
     </div>
   </section>
@@ -782,8 +921,8 @@
 <script src="headerScroll.js"></script>
 <script src="typing.js"></script>
 <script src="themeSwitch.js"></script>
-<script src="carousel.js"></script>
+<script src="carousel.js?v=3"></script>
 <script src="ctaWaves.js"></script>
-<script src="specular.js"></script>
+<script src="specular.js?v=2"></script>
 </body>
 </html>

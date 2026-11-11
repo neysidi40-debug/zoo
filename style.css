@@ -485,6 +485,9 @@
     outline:none;
     transition:transform 0.15s ease;
   }
+  /* tema claro: o texto quase branco sumia no vidro sobre o creme — vira o
+     laranja do tema (o brilho da borda acompanha, ver specular.js) */
+  html.theme-light .specular-button{ --sb-text-color:var(--orange); }
   .specular-button:active{ transform:scale(0.97); }
   .specular-button:focus-visible{
     outline:2px solid color-mix(in srgb, var(--sb-text-color) 60%, transparent);
@@ -1120,6 +1123,9 @@
     /* sem overflow:hidden (a faixa já corta os slides): o traço da borda
        (::before) passa 1px pra fora e seria cortado */
   }
+  /* faixa + setas: as setas centralizam pela altura do vídeo, não do
+     bloco todo (no toque a ficha do projeto fica embaixo, dentro do bloco) */
+  .carousel-stage{ position:relative; }
   .carousel-track{
     position:relative; /* offsetLeft dos slides relativo à faixa */
     display:flex;
@@ -1170,11 +1176,232 @@
     align-items:flex-end;
     justify-content:space-between;
     gap:12px;
-    padding:36px 18px 14px;
-    background:linear-gradient(transparent, rgba(14,13,12,0.78));
+    padding:44px 18px 14px;
+    /* um pouco mais escuro: alguns vídeos têm fundo claro (ex.: Aluado) */
+    background:linear-gradient(transparent, rgba(14,13,12,0.6) 45%, rgba(14,13,12,0.88));
     font-size:15px;
     font-weight:600;
     color:#F2EFE9;
+  }
+
+  /* ficha do projeto: o texto de cada slide mora escondido no próprio
+     slide (.slide-info) e o carousel.js copia o do slide da vez pra este
+     cartão (.work-tip), que fica FORA da faixa — dentro dela seria
+     cortado pelo overflow da rolagem.
+     · desktop largo: cartão flutuante ao lado do carrossel, no hover
+     · desktop estreito: o mesmo cartão, abaixo do carrossel
+     · toque (sem hover): sempre visível, abaixo do vídeo */
+  .slide-info{ display:none; }
+  .work-tip{
+    position:absolute;
+    z-index:4;
+    width:300px;
+    padding:20px 20px 18px;
+    background:rgba(var(--float-bg-rgb),0.97);
+    border:1px solid rgba(var(--float-line-rgb),1);
+    border-radius:var(--radius);
+    box-shadow:var(--float-shadow);
+    color:var(--paper);
+    text-align:left;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(6px);
+    /* some com atraso: dá tempo de o mouse atravessar o vão até o cartão */
+    transition:opacity .2s ease .18s, transform .2s ease .18s, visibility 0s linear .38s;
+  }
+  .work-carousel:hover .work-tip,
+  .work-carousel:focus-within .work-tip{
+    opacity:1;
+    visibility:visible;
+    transform:none;
+    transition:opacity .2s ease, transform .2s ease, visibility 0s;
+  }
+  /* abaixo do carrossel (padrão) */
+  .work-tip{ top:calc(100% + 14px); left:50%; margin-left:-150px; }
+  /* ponte invisível no vão: o mouse "continua em cima" do carrossel */
+  .work-tip::before{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:100%;
+    height:16px;
+  }
+  /* setinha apontando pro vídeo */
+  .work-tip::after{
+    content:"";
+    position:absolute;
+    top:-6px; left:50%;
+    width:10px; height:10px;
+    margin-left:-5px;
+    background:inherit;
+    border-left:1px solid rgba(var(--float-line-rgb),1);
+    border-top:1px solid rgba(var(--float-line-rgb),1);
+    transform:rotate(45deg);
+  }
+  @media (hover:hover) and (min-width:1280px){
+    .work-tip{ top:50%; left:calc(100% + 22px); width:280px; margin-left:0; transform:translate(-6px,-50%); }
+    .work-carousel:hover .work-tip,
+    .work-carousel:focus-within .work-tip{ transform:translate(0,-50%); }
+    .work-tip::before{ left:auto; right:100%; top:0; bottom:0; width:24px; height:auto; }
+    .work-tip::after{
+      top:50%; left:-6px;
+      margin:-5px 0 0;
+      border-top:0;
+      border-bottom:1px solid rgba(var(--float-line-rgb),1);
+    }
+  }
+  /* toque: vira bloco fixo embaixo do vídeo, sem esconder */
+  @media (hover:none){
+    .work-tip{
+      position:static;
+      width:auto;
+      margin:0;
+      border-width:1px 0 0;
+      box-shadow:none;
+      opacity:1;
+      visibility:visible;
+      transform:none;
+      transition:none;
+    }
+    .work-tip::before,
+    .work-tip::after{ display:none; }
+  }
+  /* ficha da ESQUERDA: o mesmo projeto no celular. Só existe em tela larga
+     com mouse (no celular a pessoa já está vendo o modo celular de verdade)
+     e só nos slides que têm vídeo de celular (data-phone no slide; o
+     carousel.js liga/desliga a classe .has-phone no carrossel). */
+  .work-phone{ display:none; }
+  @media (hover:hover) and (min-width:1280px){
+    .work-phone{
+      display:block;
+      position:absolute;
+      z-index:4;
+      top:50%;
+      right:calc(100% + 22px);
+      width:212px;
+      padding:14px 14px 16px;
+      background:rgba(var(--float-bg-rgb),0.97);
+      border:1px solid rgba(var(--float-line-rgb),1);
+      border-radius:var(--radius);
+      box-shadow:var(--float-shadow);
+      opacity:0;
+      visibility:hidden;
+      transform:translate(6px,-50%);
+      transition:opacity .2s ease .18s, transform .2s ease .18s, visibility 0s linear .38s;
+    }
+    .work-carousel.has-phone:hover .work-phone,
+    .work-carousel.has-phone:focus-within .work-phone{
+      opacity:1;
+      visibility:visible;
+      transform:translate(0,-50%);
+      transition:opacity .2s ease, transform .2s ease, visibility 0s;
+    }
+    /* ponte no vão + setinha apontando pro vídeo (espelho da .work-tip) */
+    .work-phone::before{
+      content:"";
+      position:absolute;
+      left:100%; top:0; bottom:0;
+      width:24px;
+    }
+    .work-phone::after{
+      content:"";
+      position:absolute;
+      top:50%; right:-6px;
+      width:10px; height:10px;
+      margin-top:-5px;
+      background:inherit;
+      border-right:1px solid rgba(var(--float-line-rgb),1);
+      border-top:1px solid rgba(var(--float-line-rgb),1);
+      transform:rotate(45deg);
+    }
+  }
+  .work-phone .mono{ display:block; margin-bottom:10px; letter-spacing:.4px; }
+  /* moldura do aparelho: borda grossa escura + faixa de status no topo com a
+     "ilha". O vídeo começa ABAIXO da faixa (como num celular de verdade) —
+     a ilha por cima do vídeo cobria o logo dos sites no header */
+  .work-phone__device{
+    position:relative;
+    border:7px solid #0B0A09;
+    border-radius:30px;
+    padding-top:16px;
+    overflow:hidden;
+    background:#0B0A09;
+    box-shadow:0 0 0 1px rgba(var(--float-line-rgb),1), 0 10px 24px rgba(0,0,0,.35);
+  }
+  .work-phone__device::before{
+    content:"";
+    position:absolute;
+    top:2px; left:50%;
+    width:46px; height:11px;
+    margin-left:-23px;
+    border-radius:999px;
+    background:#1c1a18;
+    z-index:1;
+  }
+  .work-phone video{
+    display:block;
+    width:100%;
+    aspect-ratio:390 / 844;
+    object-fit:cover;
+    border-radius:4px 4px 23px 23px;
+    background:#0B0A09;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .work-phone{ transition:none; }
+  }
+
+  .work-tip__body{ transition:opacity .18s ease; }
+  .work-tip.is-swapping .work-tip__body{ opacity:0; }
+  .work-tip .mono{ display:block; margin-bottom:8px; letter-spacing:.4px; }
+  .work-tip h3{
+    font-size:26px;
+    margin-bottom:10px;
+    color:var(--paper);
+  }
+  .work-tip p{
+    margin:0 0 12px;
+    font-size:14px;
+    line-height:1.6;
+    color:var(--paper-dim);
+  }
+  .work-tip ul{
+    list-style:none;
+    margin:0 0 12px;
+    padding:0;
+    display:grid;
+    gap:6px;
+  }
+  .work-tip li{
+    position:relative;
+    padding-left:14px;
+    font-size:13.5px;
+    line-height:1.45;
+    color:var(--paper);
+  }
+  .work-tip li::before{
+    content:"";
+    position:absolute;
+    left:0; top:7px;
+    width:5px; height:5px;
+    background:var(--orange);
+  }
+  .work-tip .work-tip__stack{
+    margin:0 0 14px;
+    color:var(--paper-dim);
+    font-size:11.5px;
+    line-height:1.6;
+  }
+  .work-tip a{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--orange);
+    border-bottom:1px solid currentColor;
+  }
+  .work-tip a:hover{ color:var(--paper); }
+  @media (prefers-reduced-motion: reduce){
+    .work-tip, .work-tip__body{ transition:none; }
   }
 
   /* setas < >: bem apagadas por padrão; no hover acendem e "esticam"
