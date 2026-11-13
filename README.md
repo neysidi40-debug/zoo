@@ -1,4 +1,4 @@
-# Site da Zoo — Estúdio de Sites
+# Zoo 
 
 <p align="center">
   <img src="https://i.imgur.com/4bshFdI.png" width="100%" alt="">
