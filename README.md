@@ -1,5 +1,9 @@
 # Site da Zoo — Estúdio de Sites
 
+<p align="center">
+  <img src="https://i.imgur.com/4bshFdI.png" width="100%" alt="">
+</p>
+
 Site institucional de uma página só (one-page), sem backend e sem banco de dados. Feito em React com Vite, com componentes do [React Bits](https://reactbits.dev/) e animações em Motion.
 
 ## Como rodar
