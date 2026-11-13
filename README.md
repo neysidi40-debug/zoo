@@ -1,30 +1,64 @@
 # Site da Zoo — Estúdio de Sites
 
-Site institucional de uma página só (one-page), sem backend e sem banco de dados. Só HTML, CSS e JavaScript puro — abre em qualquer navegador, sem precisar instalar nada.
+Site institucional de uma página só (one-page), sem backend e sem banco de dados. Feito em React com Vite, com componentes do [React Bits](https://reactbits.dev/) e animações em Motion.
 
-## Arquivos
+## Como rodar
 
-| Arquivo | O que tem dentro |
+```bash
+npm install
+```
+
+```bash
+npm run dev
+```
+
+Abre em `http://localhost:5173`. Para gerar a versão de publicação: `npm run build` (sai na pasta `dist/`).
+
+## Onde fica cada coisa
+
+| Caminho | O que tem dentro |
 |---|---|
-| `index.html` | Todo o texto e a estrutura das seções (header, hero, serviços, processo, projetos, depoimentos, entregáveis, FAQ, contato, rodapé) |
-| `style.css` | Toda a parte visual: cores, fontes, espaçamentos e o ajuste para celular/tablet |
-| `script.js` | O menu mobile (abre/fecha) e o destaque do link ativo no menu enquanto rola a página |
+| `index.html` | Só a casca: título, meta tags, fontes e o `<div id="root">` |
+| `src/App.jsx` | A ordem das seções na página |
+| `src/components/sections/` | Uma seção por arquivo (Hero, Growth, Process, Services, WorkCarousel, Pricing, Deliverables, Faq, CtaFinal) |
+| `src/components/` | Peças compartilhadas: Header, Footer, tela de abertura, entrada ao rolar (`Reveal`), marca-texto (`Ink`), card com holofote (`Card`) |
+| `src/data/` | Conteúdo que mais muda: contatos e menu (`site.js`) e os projetos do carrossel (`projects.js`) |
+| `src/hooks/` | Tema claro/escuro, morph do header, carrossel arrastável, seleção em marca-texto |
+| `src/reactbits/` | Componentes trazidos do reactbits.dev (variante JS + CSS) |
+| `src/styles/global.css` | Toda a parte visual: cores, fontes, espaçamentos e o ajuste para celular/tablet |
+| `public/` | Logos e os vídeos/capas dos projetos |
 
-Os três arquivos precisam ficar sempre na mesma pasta, porque o `index.html` carrega os outros dois por referência (`<link href="style.css">` e `<script src="script.js">`).
+## Componentes do React Bits
+
+| Onde | Componente |
+|---|---|
+| Fundo da hero | `Aurora` |
+| Fundo da tela de abertura | `GhostFibers` |
+| Botão "Pedir orçamento" da hero | `SpecularButton` |
+| Palavra que se reveza no título | `TextType` |
+| Letreiro da hero | `LogoLoop` |
+| Títulos de seção | `BlurText` |
+| Fichas de serviço e planos | `SpotlightCard` |
+| Fundo do menu mobile | `FluxLines` |
+
+Os arquivos são os do registro do React Bits, sem alteração — a única exceção é o `BlurText`, que ganhou a prop `as` e suporte a quebra de linha (marcado com `zoo:` no código). Para trazer outro componente: `npx shadcn@latest add https://reactbits.dev/r/<Nome>-JS-CSS` ou copie o código do site para `src/reactbits/`.
 
 ## O que ainda é placeholder (trocar antes de publicar)
 
-- **WhatsApp**: hoje aponta pro número fictício `5581900000000`. Aparece em 2 lugares no `index.html` — procure por `wa.me`.
-- **CNPJ e endereço**: no rodapé, com valores fictícios (`00.000.000/0001-00`). Procure por `CNPJ` no `index.html`.
-- **6 projetos de portfólio** e **3 depoimentos**: são exemplos fictícios pra preencher o layout. Trocar pelos primeiros clientes reais assim que existirem — apresentar case fictício como se fosse real é o oposto de credibilidade.
-- **E-mail** já está correto: `koalasuporte@gmail.com`.
+- **WhatsApp**: número fictício `5581900000000`, em `src/data/site.js`.
+- **CNPJ**: valor fictício (`00.000.000/0001-00`), em `src/data/site.js`.
+- **Preços**: valores ilustrativos, em `src/components/sections/Pricing.jsx`.
 
 ## Como editar o essencial
 
-- **Trocar um texto**: abra o `index.html`, procure o texto (Ctrl+F) e edite direto — não precisa saber programar pra isso.
-- **Trocar uma cor**: abra o `style.css`, vá até o topo do arquivo (bloco `:root`) e troque o valor da cor ali. Como todo o site usa essas variáveis, a cor muda em tudo de uma vez.
-- **Adicionar um projeto novo no portfólio**: copie um bloco `<div class="project-card">...</div>` inteiro (tem 6 no arquivo) e edite o texto de dentro.
+- **Trocar um texto**: procure o texto (Ctrl+Shift+F) dentro de `src/` e edite direto.
+- **Trocar uma cor**: topo do `src/styles/global.css` (bloco `:root` e `html.theme-light`). Todo o site usa essas variáveis.
+- **Adicionar um projeto no carrossel**: copie um bloco em `src/data/projects.js` e coloque o vídeo e a capa em `public/projetos/`.
 
 ## Como publicar
 
-Como é um site estático (sem backend), pode subir em qualquer serviço de hospedagem simples: Hostinger, Vercel, Netlify ou GitHub Pages. É só enviar os 3 arquivos — não precisa de configuração de servidor.
+Vercel e Netlify detectam o Vite sozinhos (comando `npm run build`, pasta `dist`). Em hospedagem simples, envie o conteúdo de `dist/`.
+
+## Arquivos soltos na raiz
+
+`old.mp4`, `zoo dither.png` e `fotos-integrantes/` não são usados pelo site e não entram no build.

@@ -17,7 +17,7 @@
     --on-orange: #0E0D0C;
     --header-bg: rgba(14,13,12,0.86);
     /* bolinhas flutuantes (nav compacta e tema): rgb separado por vírgula
-       porque o headerScroll.js monta rgba() com opacidade animada */
+       porque o hooks/useHeaderMorph.js monta rgba() com opacidade animada */
     --float-bg-rgb: 23,20,15;
     --float-line-rgb: 52,48,42;
     --float-shadow: 0 10px 30px rgba(0,0,0,0.45);
@@ -41,7 +41,7 @@
   }
 
   /* ---------- TEMA CLARO (creme) ----------
-     Ligado pela bolinha de tema (themeSwitch.js). Creme em vez de branco
+     Ligado pela bolinha de tema (hooks/useTheme.js). Creme em vez de branco
      puro pra não cansar a vista; o laranja fica um tom mais fechado pra
      continuar legível em cima do claro. Só troca tokens — o resto do CSS
      já usa as variáveis. */
@@ -77,7 +77,7 @@
     color-scheme: light;
   }
   /* transição curta de cores só durante a troca de tema (a classe fica
-     ~450ms no <html>, ver themeSwitch.js) */
+     ~450ms no <html>, ver hooks/useTheme.js) */
   @media (prefers-reduced-motion: no-preference){
     html.theme-switching,
     html.theme-switching *{
@@ -89,7 +89,7 @@
   html{ scroll-behavior:smooth; }
 
   /* seleção de texto
-     Com o script ativo (html.ink-selection, ver script.js), a seleção
+     Com o script ativo (html.ink-selection, ver hooks/useInkSelection.js), a seleção
      nativa fica transparente e quem pinta é o traço de marca-texto
      que corre da esquerda pra direita com um leve atraso (mesma ideia
      do Lidera360). Sem JS ou com "reduzir movimento", vale a seleção
@@ -227,18 +227,9 @@
   .crosshair::after{ height:100%; width:1px; left:50%; top:0; }
 
   /* ---------- TELA DE ABERTURA ----------
-     Véu que cobre a página (ver introLoader.js). Roda em TODO
-     carregamento. A classe intro-on entra pelo script inline do <head>,
-     antes da primeira pintura, e é ela que segura as animações do hero. */
-  /* as animações do hero ficam paradas enquanto o véu está no ar, pra a
-     entrada dele não se gastar atrás da tela de abertura. Quando a classe
-     sai, elas começam do zero. Os pseudo-elementos precisam estar na
-     lista: eles não herdam isso dos pais. */
-  html.intro-on .hero,
-  html.intro-on .hero *,
-  html.intro-on .hero *::before,
-  html.intro-on .hero *::after{ animation-play-state:paused; }
-
+     Véu que cobre a página (components/IntroVeil.jsx). Roda em TODO
+     carregamento. Aqui fica só a forma: a entrada da logo, a piscada e a
+     saída do véu são animadas pelo componente. */
   .intro-veil{
     position:fixed;
     inset:0;
@@ -248,41 +239,32 @@
     justify-content:center;
     overflow:hidden;
     background:var(--black);
-    /* quando a logo entra. O fundo se monta camada por camada antes dela
-       (FIBERS_IN, no introLoader.js) — os dois números andam juntos. Este
-       é o único lugar pra mexer no tempo da logo: todos os atrasos abaixo
-       saem daqui. */
-    --logo-in:0.85s;
-    opacity:1;
-    transition:opacity 0.65s ease; /* casar com o FADE do introLoader.js */
-  }
-  .intro-veil.is-leaving{ opacity:0; pointer-events:none; }
-  /* rede de segurança: o véu cobre a página inteira e quem o tira é o JS.
-     Se o introLoader.js não carregar, o site ficaria preso atrás dele —
-     então o próprio CSS o dissolve aos 4,6s. No caminho normal o JS já
-     removeu o elemento bem antes disso, e esta animação nem chega a rodar.
-     Pelo mesmo motivo a rolagem é travada pelo JS, e não aqui. */
-  .intro-veil{ animation:intro-failsafe 0.5s ease 4.6s forwards; }
-  @keyframes intro-failsafe{
-    to{ opacity:0; visibility:hidden; pointer-events:none; }
   }
 
-  /* o shader vem bem apagado: quem tem que puxar o olho é a logo, não o
-     fundo. A máscara dissolve as beiradas, pra a mancha ler como centrada */
-  .intro-veil__canvas{
+  /* as fibras (GhostFibers) vêm apagadas: quem tem que puxar o olho é a
+     logo, não o fundo. A máscara dissolve as beiradas, pra a mancha ler
+     como centrada */
+  .intro-veil__fibers{
+    position:absolute;
+    inset:0;
+    opacity:0.5;
+    -webkit-mask-image:radial-gradient(105% 78% at 50% 50%, #000 32%, rgba(0,0,0,.45) 66%, transparent 92%);
+            mask-image:radial-gradient(105% 78% at 50% 50%, #000 32%, rgba(0,0,0,.45) 66%, transparent 92%);
+  }
+
+  /* no celular o fundo são os raios da versão antiga (FiberRays.jsx).
+     Apagados, pra a logo mandar; a máscara só dissolve as beiradas */
+  .intro-veil__rays{
     position:absolute;
     inset:0;
     width:100%;
     height:100%;
     display:block;
-    opacity:0.22;
-    -webkit-mask-image:radial-gradient(105% 78% at 50% 50%, #000 32%, rgba(0,0,0,.45) 66%, transparent 92%);
-            mask-image:radial-gradient(105% 78% at 50% 50%, #000 32%, rgba(0,0,0,.45) 66%, transparent 92%);
+    opacity:0.3;
+    -webkit-mask-image:radial-gradient(120% 90% at 50% 50%, #000 45%, rgba(0,0,0,.5) 75%, transparent 100%);
+            mask-image:radial-gradient(120% 90% at 50% 50%, #000 45%, rgba(0,0,0,.5) 75%, transparent 100%);
   }
 
-  /* a logo surge desfocada, vinda de cima — mesma curva de três passos do
-     BlurText (blur 10px → 5px → 0, com a opacidade e o deslocamento
-     acompanhando). Aqui vale pra imagem inteira, não palavra por palavra. */
   .intro-logo{
     position:relative;
     z-index:1;
@@ -292,50 +274,16 @@
   /* as fatias ficam empilhadas no mesmo lugar: como cada arquivo tem o
      tamanho da logo inteira (com o resto transparente), elas se alinham
      sozinhas, sem posicionamento peça por peça */
-  .intro-logo img{
+  .intro-logo img,
+  .intro-logo__face{
     position:absolute;
     inset:0;
     width:100%;
     height:100%;
-    object-fit:contain;
   }
-  /* cada peça surge desfocada, na ordem Z → O → rosto. A curva de três
-     passos é a do BlurText: desfoque de 10px → 5px → 0, com a opacidade e
-     o deslocamento acompanhando. */
-  .intro-logo__z,
-  .intro-logo__o{
-    animation:intro-blur-in 0.6s cubic-bezier(.2,.7,.3,1) both;
-  }
-  .intro-logo__z{ animation-delay:var(--logo-in); }
-  .intro-logo__o{ animation-delay:calc(var(--logo-in) + 0.17s); }
-  @keyframes intro-blur-in{
-    0%  { filter:blur(10px); opacity:0;   transform:translateY(-50px); }
-    50% { filter:blur(5px);  opacity:0.5; transform:translateY(5px); }
-    100%{ filter:blur(0);    opacity:1;   transform:translateY(0); }
-  }
-  /* o rosto entra por último e, mais tarde, dá a piscada: a camada de
-     olhos abertos some enquanto a do olho fechado aparece. A camada que
-     pisca não faz o desfoque — ela nasce invisível e só troca de opacidade */
-  .intro-logo__face--open{
-    animation:
-      intro-blur-in 0.6s cubic-bezier(.2,.7,.3,1) calc(var(--logo-in) + 0.34s) both,
-      intro-eyes-close 0.3s cubic-bezier(.45,0,.55,1) calc(var(--logo-in) + 1.15s) forwards;
-  }
-  .intro-logo__face--wink{
-    opacity:0;
-    animation:intro-eyes-open 0.3s cubic-bezier(.45,0,.55,1) calc(var(--logo-in) + 1.15s) forwards;
-  }
-  @keyframes intro-eyes-close{ to{ opacity:0; } }
-  @keyframes intro-eyes-open{ to{ opacity:1; } }
+  .intro-logo img{ object-fit:contain; }
 
-  @media (prefers-reduced-motion: reduce){
-    /* sem piscada nem desfoque: a logo já aparece pronta e o véu sai */
-    .intro-logo img{ animation:none; }
-    .intro-logo__face--open{ opacity:0; }
-    .intro-logo__face--wink{ opacity:1; }
-  }
-
-  /* fio de progresso de leitura, criado pelo JS (ver script.js).
+  /* fio de progresso de leitura (components/ScrollProgress.jsx).
      Adaptado do .scroll-progress do Lidera360, no laranja do site.
      z-index alto de propósito: o header é 100 e fica colado no topo, então
      com um valor menor ele cobriria os 2px da barra. */
@@ -364,9 +312,9 @@
      linhas) e sem borda própria — a nav tem 64px, igual ao tamanho
      do quadrado do .grid-bg, então a linha do grid cai exatamente
      embaixo dela e faz o papel de divisória.
-     Ao sair da hero volta ao estado sólido. (classe no script.js)
+     Ao sair da hero volta ao estado sólido. (classe posta pelo hooks/useHeaderMorph.js)
      No desktop, o primeiro scroll ainda transforma a nav numa
-     bolinha — ver HEADER COMPACTO logo abaixo e headerScroll.js */
+     bolinha — ver HEADER COMPACTO logo abaixo e hooks/useHeaderMorph.js */
   header.over-hero{
     background:transparent;
     border-bottom-color:transparent;
@@ -375,7 +323,7 @@
 
   /* ---------- HEADER COMPACTO (desktop) ----------
      forma, tamanho e posição da bolinha são animados no
-     headerScroll.js, frame a frame; aqui fica só o que não
+     hooks/useHeaderMorph.js, frame a frame; aqui fica só o que não
      participa do morph: a bolinha em si, a sombra e o hover */
   .nav-bubble{
     position:absolute;
@@ -424,7 +372,8 @@
     color:var(--paper-dim);
   }
   .nav-links a{ transition:color 0.2s ease; }
-  .nav-links a:hover{ color:var(--paper); }
+  .nav-links a:hover,
+  .nav-links a.is-active{ color:var(--paper); } /* is-active = a seção que está na tela */
   .btn{
     display:inline-flex;
     align-items:center;
@@ -451,60 +400,15 @@
   .btn-solid:hover{ background:var(--glass-strong-hover); }
   .btn:not(.btn-solid):hover{ background:var(--orange); color:var(--on-orange); }
   /* ---------- BOTÃO ESPECULAR ----------
-     Porte do SpecularButton.css (React Bits). Quem desenha o brilho da
-     borda é um shader WebGL — ver specular.js.
-     Diferença proposital: o original vem com fundo transparente
-     (--sb-tint-opacity 0, --sb-blur 0); aqui usa o MESMO vidro padrão dos
-     outros botões do site (--glass-bg/--glass-blur/--glass-sheen), em vez
-     de um vidro próprio — é o que deixa ele "igual ao resto do site" em
-     vez de destoar. Chegou a ter um fundo de ondas com dither (dither.js)
-     dentro dele; foi removido por pedido do usuário, ficou destoando. */
-  .specular-button{
-    --sb-radius:18px;
-    --sb-text-color:#f5f5f5;
-
-    position:relative;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    border:none;
-    margin:0;
-    font-family:inherit;
-    font-weight:500;
-    letter-spacing:0.01em;
-    line-height:1;
-    color:var(--sb-text-color);
-    background:var(--glass-bg);
-    border-radius:var(--sb-radius);
-    backdrop-filter:var(--glass-blur);
+     É o SpecularButton do React Bits (src/reactbits). A forma, o vidro e
+     o brilho da borda vêm do componente e das props passadas no Hero.jsx;
+     aqui só entram os dois detalhes do vidro padrão do site que ele não
+     tem: a saturação do desfoque e a luz de cima (--glass-sheen). */
+  .hero .specular-button{
     -webkit-backdrop-filter:var(--glass-blur);
-    box-shadow:
-      var(--glass-sheen),
-      0 8px 24px rgba(0,0,0,0.25);
-    cursor:pointer;
-    outline:none;
-    transition:transform 0.15s ease;
+            backdrop-filter:var(--glass-blur);
+    box-shadow:var(--glass-sheen), 0 8px 24px rgba(0,0,0,0.25);
   }
-  /* tema claro: o texto quase branco sumia no vidro sobre o creme — vira o
-     laranja do tema (o brilho da borda acompanha, ver specular.js) */
-  html.theme-light .specular-button{ --sb-text-color:var(--orange); }
-  .specular-button:active{ transform:scale(0.97); }
-  .specular-button:focus-visible{
-    outline:2px solid color-mix(in srgb, var(--sb-text-color) 60%, transparent);
-    outline-offset:3px;
-  }
-  .specular-button--sm{ font-size:0.85rem; padding:10px 22px; }
-  .specular-button--md{ font-size:1rem; padding:14px 30px; }
-  .specular-button--lg{ font-size:1.15rem; padding:18px 40px; }
-  /* o canvas passa 20px pra fora do botão, pro brilho da borda poder vazar */
-  .specular-button__fx{
-    position:absolute;
-    inset:-20px;
-    pointer-events:none;
-    z-index:1;
-  }
-  .specular-button__fx canvas{ display:block; width:100%; height:100%; }
-  .specular-button__label{ position:relative; z-index:2; }
 
   .nav-cta{ font-size:13px; padding:9px 18px; }
   /* ---------- MENU MOBILE ----------
@@ -534,7 +438,7 @@
   .menu-toggle.open span:nth-child(3){ transform:translateY(-6px) rotate(-45deg); }
 
   /* o borrão sobre o resto da tela. Fica abaixo do painel e acima de tudo
-     mais; o clique nele fecha o menu (ver script.js) */
+     mais; o clique nele fecha o menu (ver components/Header.jsx) */
   .nav-scrim{
     position:fixed;
     inset:0;
@@ -560,11 +464,7 @@
   .mobile-nav{
     position:fixed;
     top:0; bottom:0; right:0;
-    width:min(78vw, 300px);
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    padding:0 28px;
+    width:min(86vw, 340px);
     overflow:hidden;
     z-index:104;
     visibility:hidden;
@@ -599,37 +499,140 @@
   }
   .mobile-nav.open .mobile-nav__splash::after{ transform:scale(1); }
 
-  .mobile-nav__items{
+  /* o clima do painel, por cima do círculo: um brilho laranja que desce do
+     canto do botão e, por cima dele, as linhas em movimento do FluxLines.
+     Entra um instante depois de o círculo pintar o fundo. */
+  .mobile-nav__glow{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 0.25s ease;
+    background:radial-gradient(130% 48% at 100% 0%, var(--orange-glow), transparent 72%);
+  }
+  /* as linhas do FluxLines (React Bits): apagadas, e só na parte de cima
+     do painel. A máscara as dissolve devagar pra baixo — lá pelo meio dos
+     links já não tem linha nenhuma, e o botão da base fica em fundo liso */
+  .mobile-nav__flux{
+    position:absolute;
+    inset:0 0 auto 0;
+    height:68%;
+    opacity:0.32;
+    -webkit-mask-image:linear-gradient(#000 0%, rgba(0,0,0,.55) 38%, transparent 100%);
+            mask-image:linear-gradient(#000 0%, rgba(0,0,0,.55) 38%, transparent 100%);
+  }
+  .mobile-nav.open .mobile-nav__glow{
+    opacity:1;
+    transition:opacity 0.6s ease 0.3s;
+  }
+
+  /* o conteúdo, em três andares: a logo em cima, os links no meio e o
+     botão com os contatos colados na base. A entrada de cada peça (uma
+     depois da outra) é animada pelo components/Header.jsx. */
+  .mobile-nav__inner{
     position:relative;
     z-index:1;
+    height:100%;
     display:flex;
     flex-direction:column;
+    padding:22px 26px 26px;
+    overflow-y:auto;
+    scrollbar-width:none;
   }
-  /* cada item cai de uma altura diferente (--i) e só depois que o círculo
-     já pintou o fundo — daí o atraso de 0.3s */
-  .mobile-nav a{
-    padding:13px 0;
-    border-bottom:1px solid var(--line);
-    font-size:16px;
-    color:var(--paper-dim);
-    opacity:0;
-    transform:translateY(calc(var(--i, 1) * -34px));
-    transition:opacity 0.3s cubic-bezier(0,.995,.99,1) 0.3s,
-               transform 0.3s cubic-bezier(0,.995,.99,1) 0.3s,
-               color 0.2s ease;
-  }
-  .mobile-nav a:nth-child(1){ --i:1; }
-  .mobile-nav a:nth-child(2){ --i:2; }
-  .mobile-nav a:nth-child(3){ --i:3; }
-  .mobile-nav a:nth-child(4){ --i:4; }
-  .mobile-nav a:nth-child(5){ --i:5; }
-  .mobile-nav a:nth-child(6){ --i:6; }
-  .mobile-nav.open a{ opacity:1; transform:translateY(0); }
-  .mobile-nav a:not(.btn):hover{ color:var(--orange); }
-  .mobile-nav a:last-of-type{ border-bottom:none; }
-  .mobile-nav .btn{ margin-top:22px; justify-content:center; }
+  .mobile-nav__inner::-webkit-scrollbar{ display:none; }
 
-  /* ---------- BOLINHA DE TEMA (themeSwitch.js) ----------
+  /* a logo do menu: as duas artes empilhadas (olhos abertos e a piscada),
+     trocando de opacidade — a mesma piscada da hero no desktop. A margem
+     negativa desconta a borda transparente da PNG, pra o Z alinhar com o
+     texto de baixo. */
+  .mobile-nav__brand{
+    align-self:flex-start;
+    margin-bottom:26px;
+  }
+  .menu-logo{
+    position:relative;
+    display:block;
+    width:176px;
+    aspect-ratio:612 / 408;
+    margin:-8px 0 0 -27px;
+    filter:var(--hero-logo-filter);
+  }
+  .menu-logo img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+
+  .mobile-nav__kicker{
+    display:block;
+    margin-bottom:12px;
+    font-size:11px;
+    letter-spacing:0.4px;
+    color:var(--paper-dim);
+  }
+  .mobile-nav__links{
+    display:flex;
+    flex-direction:column;
+    border-top:1px solid var(--line);
+  }
+  /* cada link: o número em mono, o nome na fonte dos títulos e a seta, que
+     anda um passo quando a linha acende */
+  .mobile-nav__link{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    padding:17px 0 15px;
+    border-bottom:1px solid var(--line);
+  }
+  .mobile-nav__link .mono{ font-size:11px; }
+  .mobile-nav__label{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:34px;
+    line-height:0.92;
+    letter-spacing:0.2px;
+    color:var(--paper);
+    transition:color 0.2s ease;
+  }
+  .mobile-nav__arrow{
+    margin-left:auto;
+    margin-right:6px; /* folga pro passo que a seta dá, sem passar do fio */
+    font-size:17px;
+    color:var(--paper-dim);
+    transition:color 0.2s ease, transform 0.25s cubic-bezier(.2,.7,.3,1);
+  }
+  .mobile-nav__link:hover .mobile-nav__label,
+  .mobile-nav__link.is-active .mobile-nav__label,
+  .mobile-nav__link:hover .mobile-nav__arrow,
+  .mobile-nav__link.is-active .mobile-nav__arrow{ color:var(--orange); }
+  .mobile-nav__link:hover .mobile-nav__arrow,
+  .mobile-nav__link.is-active .mobile-nav__arrow{ transform:translateX(4px); }
+
+  /* a base: margin-top:auto empurra o bloco pro fim do painel */
+  .mobile-nav__foot{
+    margin-top:auto;
+    padding-top:28px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .mobile-nav__foot .btn{
+    justify-content:center;
+    padding:14px 20px;
+    font-size:15px;
+  }
+  .mobile-nav__meta{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-size:11px;
+    letter-spacing:0.4px;
+  }
+  .mobile-nav__meta span{ color:var(--paper-dim); }
+
+  /* ---------- BOLINHA DE TEMA (components/ThemeToggle.jsx) ----------
      Fixa no canto inferior direito, mesmo tamanho e visual da bolinha
      da nav compacta (64px). Lua no escuro, sol no claro — os dois em
      laranja. */
@@ -655,7 +658,7 @@
   /* ela só entra depois que a nav vira bolinha, nos dois tamanhos de tela:
      as duas flutuantes aparecem juntas, em vez de a de tema ficar sozinha
      no canto desde o topo da página. Vale no celular porque a barra também
-     se recolhe lá (ver headerScroll.js) — antes não valia, quando o morph
+     se recolhe lá (ver hooks/useHeaderMorph.js) — antes não valia, quando o morph
      era só de desktop.
      A entrada usa translate, e não transform: assim o scale do hover
      continua valendo, já que são propriedades separadas. */
@@ -722,8 +725,11 @@
     display:flex;
     flex-direction:column;
     justify-content:center;
+    /* a logo flutuante se posiciona por este bloco, e é isso que põe o
+       conteúdo por cima da grade de fundo */
+    position:relative;
   }
-  /* fundo aurora (WebGL, ver script.js) — só na hero, bem apagado
+  /* fundo aurora (Aurora do React Bits, ver sections/Hero.jsx) — só na hero, bem apagado
      pra não competir com o conteúdo */
   .hero-aurora{
     position:absolute;
@@ -798,14 +804,14 @@
     animation-iteration-count:1, infinite;
     animation-fill-mode:forwards, none;
   }
-  .hero > .wrap::before{
-    background-image:url("zoo.png");
-    animation-name:hero-logo-closed, fragment-float;
-  }
-  .hero > .wrap::after{
-    background-image:url("zoo-eyes-open.png");
-    animation-name:hero-logo-open, fragment-float;
-  }
+  /* as imagens ficam em public/, por isso o caminho começa com "/" */
+  .hero > .wrap::before{ background-image:url("/zoo.png"); }
+  .hero > .wrap::after{ background-image:url("/zoo-eyes-open.png"); }
+  /* a animação só recebe nome quando o hero está liberado (is-ready, posta
+     pelo Hero.jsx quando a tela de abertura começa a sair) — senão a
+     entrada e a piscada se gastariam atrás do véu */
+  .hero.is-ready > .wrap::before{ animation-name:hero-logo-closed, fragment-float; }
+  .hero.is-ready > .wrap::after{ animation-name:hero-logo-open, fragment-float; }
   /* olhos abertos: entram com a logo, ficam até a piscada e somem.
      A piscada vai de 90% a 96% dos 3s (~180ms), com curva suave nas duas
      camadas ao mesmo tempo, pra o olho fechar macio em vez de trocar seco */
@@ -855,43 +861,30 @@
   @media (prefers-reduced-motion: reduce){
     .hero-tag .dot{ animation:none; }
   }
+  /* a entrada do hero (título linha a linha, texto, botões) é animada pelo
+     Hero.jsx; aqui fica só a forma */
   .hero h1{
     font-size:clamp(48px, 8vw, 108px);
     max-width:900px;
-    opacity:0;
-    transform:translateY(24px);
-    animation:rise 0.7s cubic-bezier(.2,.7,.3,1) forwards;
   }
-  /* ">" pra pegar só as 3 linhas — os spans do efeito de digitação
-     dentro da .l3 não podem virar block nem ganhar a animação */
-  .hero h1 > span{
-    display:block;
-    opacity:0;
-    transform:translateY(24px);
-    animation:rise 0.7s cubic-bezier(.2,.7,.3,1) forwards;
-  }
-  .hero h1 .l2{ animation-delay:0.12s; }
-  .hero h1 .l3{ animation-delay:0.24s; color:var(--orange); }
-  @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+  /* ">" pra pegar só as 3 linhas — os spans da palavra digitada dentro da
+     .l3 não podem virar block */
+  .hero h1 > span{ display:block; }
+  .hero h1 .l3{ color:var(--orange); }
 
-  /* palavra digitada no título (typing.js) + cursor */
-  .typed-word{ white-space:nowrap; }
-  /* o cursor é um elemento próprio, e não um ::after da palavra: assim ele
-     fica DEPOIS do ponto final, que faz parte da frase */
-  .typed-caret{
-    display:inline-block;
-    width:0.07em;
-    height:0.78em;
-    margin-left:0.06em;
-    background:currentColor;
-    vertical-align:-0.02em;
-    animation:caret-blink 1s steps(1) infinite;
+  /* palavra digitada no título: é o TextType do React Bits. O min-height
+     segura a linha enquanto a palavra está vazia, entre uma e outra */
+  .typed-word{
+    white-space:nowrap;
+    min-height:0.92em;
+    vertical-align:top;
   }
-  /* enquanto digita o cursor fica sólido; parado, pisca */
-  .typed-word.is-typing ~ .typed-caret{ animation:none; }
-  @keyframes caret-blink{ 50%{ opacity:0; } }
-  @media (prefers-reduced-motion: reduce){
-    .typed-caret{ display:none; }
+  /* o cursor em barra do TextType, na altura das maiúsculas da fonte do
+     título (o padrão dele é mais alto que a linha de 0.92) */
+  .typed-word .text-type__shape{
+    height:0.78em;
+    vertical-align:-0.02em;
+    border-radius:0;
   }
 
   .hero p.lede{
@@ -903,9 +896,6 @@
     font-size:17px;
     line-height:1.6;
     color:var(--paper-dim);
-    opacity:0;
-    animation:rise 0.7s cubic-bezier(.2,.7,.3,1) forwards;
-    animation-delay:0.36s;
   }
   /* os dois viraram uma coluna: o botão em cima e, embaixo, o "Ver projetos"
      desenhado como árvore de diretórios */
@@ -915,30 +905,16 @@
     flex-direction:column;
     gap:18px;
     align-items:flex-start;
-    opacity:0;
-    animation:rise 0.7s cubic-bezier(.2,.7,.3,1) forwards;
-    animation-delay:0.46s;
   }
   .hero-actions .mono{ color:var(--paper-dim); }
 
   /* ---------- "VER PROJETOS" EM ÁRVORE ----------
-     Entra depois do botão de cima (o .hero-actions inteiro aparece em
-     0,46s; esta linha só em 1,2s) e, quando ela já está na tela, o
-     sublinhado se desenha da esquerda pra direita — mesma ideia do
-     marca-texto do resto do site. */
-  /* nasce mais pra direita e, depois de aparecer, escorrega de leve pra
-     esquerda. Os dois movimentos ficam no mesmo keyframe de propósito:
-     duas animações mexendo em transform ao mesmo tempo brigariam */
+     Entra depois do botão de cima e, quando já está na tela, o sublinhado
+     se desenha da esquerda pra direita — mesma ideia do marca-texto do
+     resto do site. Os tempos estão no Hero.jsx. */
   .hero-tree{
     display:flex;
     margin-left:52px;
-    opacity:0;
-    animation:tree-enter 1.5s 1.2s forwards;
-  }
-  @keyframes tree-enter{
-    0%  { opacity:0; transform:translateX(16px); animation-timing-function:cubic-bezier(.2,.7,.3,1); }
-    30% { opacity:1; transform:translateX(16px); animation-timing-function:cubic-bezier(.16,1,.3,1); }
-    100%{ opacity:1; transform:translateX(0); }
   }
   .hero-tree__link{
     display:inline-flex;
@@ -955,40 +931,39 @@
     background-position:0 100%;
     background-size:0% 2px;
     padding-bottom:2px;
-    animation:tree-underline 0.55s cubic-bezier(.16,1,.3,1) 1.9s forwards;
   }
-  @keyframes tree-underline{ to{ background-size:100% 2px; } }
   .hero-tree__link:hover .hero-tree__label{ color:var(--orange); }
 
-  /* marquee */
+  /* ---------- LETREIRO ----------
+     É o LogoLoop do React Bits: anda sozinho, dá pra arrastar e emenda
+     sem fim. Aqui só a moldura e o desenho de cada palavra. O min-height
+     guarda o lugar da faixa enquanto o letreiro ainda não montou (ele só
+     entra quando a tela de abertura sai). */
   .marquee-wrap{
     margin-top:90px;
     border-top:1px solid var(--line);
     border-bottom:1px solid var(--line);
     padding:18px 0;
+    min-height:60px;
     white-space:nowrap;
   }
-  /* sem animação automática: o letreiro só anda quando a pessoa arrasta
-     (.drag-scroll + data-loop, ver carousel.js) */
-  .marquee{
-    display:inline-flex;
-  }
-  .marquee span{
+  .marquee-item{
     font-family:'Big Shoulders Display', sans-serif;
     font-weight:700;
     font-size:22px;
+    line-height:1;
     color:var(--paper-dim);
     padding:0 26px;
     display:inline-flex;
     align-items:center;
     gap:26px;
   }
-  .marquee span::after{
+  .marquee-item::after{
     content:"—";
     color:var(--orange);
   }
-  /* faixas arrastáveis (carousel.js): rolam na horizontal só quando a
-     pessoa puxa; barra de rolagem escondida */
+  /* faixa arrastável do carrossel de projetos (hooks/useSnapCarousel.js):
+     rola na horizontal quando a pessoa puxa; barra de rolagem escondida */
   .drag-scroll{
     overflow-x:auto;
     overflow-y:hidden;
@@ -1040,10 +1015,20 @@
     background:var(--line);
     border:1px solid var(--line);
   }
-  .service-card{
+  /* cada ficha é uma célula da grade (.service-cell, o bloco que surge ao
+     rolar) com o card de holofote dentro (.service-card = SpotlightCard do
+     React Bits, ver components/Card.jsx). O card original do componente é
+     arredondado e com respiro próprio: aqui volta a ser a ficha quadrada
+     do site. */
+  .service-cell{
+    display:flex;
     background:var(--panel);
+  }
+  .spotlight-card.service-card{
+    flex:1;
+    min-width:0;
+    border-radius:0;
     padding:34px 30px 30px;
-    position:relative;
   }
   .service-card .num{
     font-family:'JetBrains Mono', monospace;
@@ -1083,18 +1068,18 @@
      números são herdados pelo ::before, que é quem anima.
      Os valores padrão existem pra não quebrar a conta se algum dia uma
      ficha ganhar um quinto item: sem eles, o calc ficaria inválido. */
-  .service-card{ --spec-card:0; }
-  .service-card .spec-list li{ --spec-item:0; }
-  .service-card:nth-child(2){ --spec-card:1; }
-  .service-card:nth-child(3){ --spec-card:2; }
-  .service-card .spec-list li:nth-child(2){ --spec-item:1; }
-  .service-card .spec-list li:nth-child(3){ --spec-item:2; }
-  .service-card .spec-list li:nth-child(4){ --spec-item:3; }
+  .service-cell{ --spec-card:0; }
+  .service-cell .spec-list li{ --spec-item:0; }
+  .service-cell:nth-child(2){ --spec-card:1; }
+  .service-cell:nth-child(3){ --spec-card:2; }
+  .service-cell .spec-list li:nth-child(2){ --spec-item:1; }
+  .service-cell .spec-list li:nth-child(3){ --spec-item:2; }
+  .service-cell .spec-list li:nth-child(4){ --spec-item:3; }
   /* a duração (0,85s) é bem maior que o intervalo entre um quadradinho e o
      seguinte (0,09s): é essa sobreposição que deixa o rastro. O brilho
      acende seco (pico em 18%) e desbota o resto do tempo, então o ponto
      aceso corre na frente e a cauda fica pra trás. */
-  .service-card.is-visible .spec-list li::before{
+  .service-cell.is-visible .spec-list li::before{
     animation:spec-blink 0.85s ease-out forwards;
     animation-delay:calc(0.9s + (var(--spec-card) * 4 + var(--spec-item)) * 0.09s);
   }
@@ -1185,7 +1170,7 @@
   }
 
   /* ficha do projeto: o texto de cada slide mora escondido no próprio
-     slide (.slide-info) e o carousel.js copia o do slide da vez pra este
+     projeto (data/projects.js) e o WorkCarousel.jsx escreve o do slide da vez neste
      cartão (.work-tip), que fica FORA da faixa — dentro dela seria
      cortado pelo overflow da rolagem.
      · desktop largo: cartão flutuante ao lado do carrossel, no hover
@@ -1249,8 +1234,8 @@
       border-bottom:1px solid rgba(var(--float-line-rgb),1);
     }
   }
-  /* toque: vira bloco fixo embaixo do vídeo, sem esconder */
-  @media (hover:none){
+  /* toque ou tela de celular: vira bloco fixo embaixo do vídeo, sem esconder */
+  @media (hover:none), (max-width:860px){
     .work-tip{
       position:static;
       width:auto;
@@ -1268,7 +1253,7 @@
   /* ficha da ESQUERDA: o mesmo projeto no celular. Só existe em tela larga
      com mouse (no celular a pessoa já está vendo o modo celular de verdade)
      e só nos slides que têm vídeo de celular (data-phone no slide; o
-     carousel.js liga/desliga a classe .has-phone no carrossel). */
+     WorkCarousel.jsx liga/desliga a classe .has-phone no carrossel). */
   .work-phone{ display:none; }
   @media (hover:hover) and (min-width:1280px){
     .work-phone{
@@ -1458,7 +1443,7 @@
 
   /* quando o carrossel aparece (e o vídeo carrega), as setas fazem a
      animação do hover UMA vez, pra mostrar que dá pra passar — a classe
-     .is-hinting fica ~0,9s no .work-carousel (carousel.js). A seta de
+     .is-hinting fica ~0,9s no .work-carousel (WorkCarousel.jsx). A seta de
      avançar entra um tiquinho depois da de voltar */
   .work-carousel.is-hinting .carousel-btn:not(:disabled){ opacity:1; }
   .work-carousel.is-hinting .carousel-btn:not(:disabled) svg{
@@ -1469,7 +1454,7 @@
 
   /* borda que acende UMA vez, no mesmo momento da dica das setas —
      adaptado do player de vídeo do Lidera360, em laranja, só com o traço
-     (sem o brilho de fundo). Ligado pela classe .is-pulsing (carousel.js),
+     (sem o brilho de fundo). Ligado pela classe .is-pulsing (WorkCarousel.jsx),
      que sai quando o traço termina.
      O traço é um anel: duas máscaras (content-box e border-box) subtraídas
      deixam só os 2px de padding das beiradas; o que anda é o
@@ -1526,7 +1511,7 @@
   /* linha da timeline em segmentos: cada passo (menos o último) tem um
      trecho que vai do centro do seu marcador até o centro do próximo.
      ::before = trilho cinza, ::after = preenchimento laranja, que o
-     script.js vai enchendo pela variável --fill (0 a 1), em sequência.
+     sections/Process.jsx vai enchendo pela variável --fill (0 a 1), em sequência.
      Desktop: horizontal (largura da coluna + gap de 24px).
      Mobile: vertical (ver @media no fim do arquivo). */
   .step:not(:last-child)::before,
@@ -1544,7 +1529,7 @@
     transform-origin:left center;
     transform:scaleX(var(--fill, 0));
   }
-  /* marcador acende quando a linha chega nele (.is-done, script.js) */
+  /* marcador acende quando a linha chega nele (.is-done, sections/Process.jsx) */
   .step.is-done .step-marker{
     background:var(--orange);
     color:var(--on-orange);
@@ -1676,23 +1661,29 @@
     gap:26px;
     align-items:stretch;
   }
-  .plan-card{
+  /* .plan-cell é a célula da grade (o bloco que surge ao rolar);
+     .plan-card é o card de holofote dentro dela (SpotlightCard do React
+     Bits, ver components/Card.jsx). O fio de 1px em volta e o brilho que
+     acende a borda por onde o mouse passa são do componente — a cor do fio
+     vem do Card.jsx (--line, ou --orange no plano em destaque). */
+  .plan-cell{
     position:relative;
     display:flex;
-    flex-direction:column;
-    background:var(--panel);
-    border:1px solid var(--line);
-    padding:32px 30px 30px;
-    transition:border-color 0.25s ease;
   }
-  .plan-card:hover{ border-color:rgba(255,90,31,0.5); }
-  .plan-card--featured,
-  .plan-card--featured:hover{
-    border-color:var(--orange);
+  .spotlight-card.plan-card{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    border-radius:0;
+    padding:32px 30px 30px;
+  }
+  .spotlight-card.plan-card--featured{
     background:linear-gradient(180deg, var(--orange-glow), transparent 55%), var(--panel);
   }
   .plan-badge{
     position:absolute;
+    z-index:2; /* por cima do card: ele mora na célula, fora do card */
     top:-11px; right:24px;
     background:var(--orange);
     color:var(--on-orange);
@@ -1748,7 +1739,7 @@
   /* pill deslizante: duas versões do plano no mesmo card, trocando
      com crossfade + slide sem o card mudar de tamanho — as duas panes
      ocupam a mesma célula do grid, então a altura é a da maior.
-     A troca em si fica no script.js (mesma lógica do Lidera360) */
+     O deslize da pill e a troca das panes são animados pelo Pricing.jsx */
   .plan-toggle{
     position:relative;
     display:flex;
@@ -1768,7 +1759,6 @@
     background:var(--orange);
     border-radius:999px;
     box-shadow:0 4px 14px rgba(255,90,31,0.35);
-    transition:transform 0.4s cubic-bezier(.65,0,.35,1);
   }
   .plan-toggle-btn{
     position:relative;
@@ -1792,12 +1782,9 @@
     grid-row:1; grid-column:1;
     display:flex;
     flex-direction:column;
-    opacity:0;
-    pointer-events:none;
-    transform:translateX(16px);
-    transition:opacity 0.4s cubic-bezier(.16,1,.3,1), transform 0.4s cubic-bezier(.16,1,.3,1);
   }
-  .plan-toggle-pane.is-active{ opacity:1; pointer-events:auto; transform:translateX(0); }
+  /* a pane escondida não pode roubar o clique da que está na frente */
+  .plan-toggle-pane[inert]{ pointer-events:none; }
 
   /* faixa de painel: alterna o fundo com as seções vizinhas pra a página
      não virar um bloco só de --black. Era o fundo do .testimonials, que
@@ -1865,7 +1852,7 @@
     border-bottom:1px solid var(--line);
     overflow:hidden;
   }
-  /* fundo de ondas de formas (ctaWaves.js): grade de quadrados, círculos e
+  /* fundo de ondas de formas (components/ShapeWaves.jsx): grade de quadrados, círculos e
      triângulos definida por ruído, com ondas saindo de onde o mouse passa */
   .cta-waves{
     position:absolute;
@@ -1969,6 +1956,8 @@
     max-width:520px;
   }
   .growth-text p:last-child{ margin-bottom:0; }
+  /* inline-block: um <span> comum não aceita o deslocamento da entrada */
+  .growth-kicker{ display:inline-block; }
 
   .growth-chart{ position:relative; }
   /* o painel corta nos cantos; por isso a bolinha da ponta mora fora dele */
@@ -2089,7 +2078,7 @@
     margin-top:8px;
   }
 
-  /* contador dos números (script.js): o número e o sufixo entram como
+  /* contador dos números (seção fora do ar): o número e o sufixo entram como
      "palavras" separadas, desfocadas e vindo de cima — inspirado no
      BlurText do React Bits — enquanto o número sobe de 0 até o final */
   .count-word{
@@ -2167,23 +2156,8 @@
      resposta pra baixo em relação à pergunta */
   .faq-item p{ margin:0; font-size:14.5px; color:var(--paper-dim); line-height:1.65; max-width:560px; }
 
-  /* ---------- SCROLL REVEAL ---------- */
-  .reveal{
-    opacity:0;
-    transform:translateY(26px);
-    transition:opacity 0.7s cubic-bezier(.2,.7,.3,1), transform 0.7s cubic-bezier(.2,.7,.3,1);
-  }
-  .reveal.is-visible{
-    opacity:1;
-    transform:translateY(0);
-  }
-  /* escalona a entrada dos itens dentro de um grid/lista */
-  .stagger > *:nth-child(1){ transition-delay:0s; }
-  .stagger > *:nth-child(2){ transition-delay:0.08s; }
-  .stagger > *:nth-child(3){ transition-delay:0.16s; }
-  .stagger > *:nth-child(4){ transition-delay:0.24s; }
-  .stagger > *:nth-child(5){ transition-delay:0.32s; }
-  .stagger > *:nth-child(6){ transition-delay:0.4s; }
+  /* A entrada dos blocos ao rolar (subir e aparecer, com os itens de uma
+     grade em sequência) é do components/Reveal.jsx — não tem CSS aqui. */
 
   /* ---------- MARCA-TEXTO ----------
      <mark class="ink"> nos trechos que mais pesam na decisão de quem
@@ -2191,7 +2165,7 @@
      posse do site e suporte. O traço é um background que cresce de 0 a
      100% da largura — o texto fica por cima sem z-index, e o
      box-decoration-break faz o traço quebrar junto com a linha.
-     Quem liga (.is-inked) é o script.js, depois que o bloco termina de
+     Quem liga (.is-inked) é o components/Ink.jsx, depois que o bloco termina de
      surgir. Mesma técnica do Lidera360, na cor do Zoo. */
   mark.ink{
     background-color:transparent;   /* mata o amarelo padrão do <mark> */
@@ -2216,7 +2190,7 @@
 
   /* sublinhado: versão minimalista do marca-texto — uma linha laranja
      de 2px que corre da esquerda pra direita embaixo do trecho. Mesmo
-     gatilho e mesmo tempo do mark.ink (script.js adiciona .is-inked) */
+     gatilho e mesmo tempo do mark.ink (components/Ink.jsx adiciona .is-inked) */
   .uline{
     background-image:linear-gradient(var(--orange), var(--orange));
     background-repeat:no-repeat;
@@ -2247,7 +2221,7 @@
     }
     .nav-cta{ display:none; }
     /* a bolinha é a barra encolhida, igual ao desktop — a forma e a posição
-       vêm do headerScroll.js, frame a frame. Aqui só o coala, que fica
+       vêm do hooks/useHeaderMorph.js, frame a frame. Aqui só o coala, que fica
        menor pra sobrar respiro dentro dela. */
     .nav-bubble svg{ width:24px; height:24px; }
     .service-grid{ grid-template-columns:1fr; }
@@ -2313,7 +2287,7 @@
     /* ---- a equipe vira letreiro ----
        Em duas colunas os cartões ficam pequenos demais e a lista come meia
        tela de rolagem. Passando sozinhos, cada rosto aparece num tamanho
-       que dá pra ver. O movimento e o arraste são do carousel.js — daqui
+       que dá pra ver. O movimento e o arraste eram do carousel.js (seção fora do ar) — daqui
        sai só a faixa rolável; as propriedades são as mesmas do .drag-scroll
        do letreiro da hero. */
     .team-marquee{
@@ -2343,4 +2317,67 @@
        hover no telefone, é ele que dá a cor do site à faixa */
     .team-marquee .team-info{ border-top-color:var(--orange); }
     .team-marquee .team-info .mono{ color:var(--orange); }
+  }
+
+  /* ---------- CARROSSEL NO CELULAR ----------
+     Até 860px o carrossel ganha uma pill "Celular | Desktop" (a mesma
+     dos planos) que escolhe a gravação do slide — ver WorkCarousel.jsx.
+     O 860 tem par lá: os dois precisam bater. */
+  .view-toggle{
+    margin:10px;
+  }
+  .view-toggle .plan-toggle-btn:disabled{
+    opacity:0.4;
+    cursor:default;
+  }
+
+  /* slide em pé (pill em "Celular"): todos os slides ficam do mesmo
+     tamanho, pra ficha de baixo não pular ao passar de projeto. Quem tem
+     gravação de celular mostra o aparelho; quem não tem, o vídeo de
+     desktop centralizado. No fundo, a capa do projeto desfocada. */
+  .carousel-slide--tall{
+    aspect-ratio:4 / 5;
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+    background:var(--panel);
+  }
+  .carousel-slide--tall > video{ position:relative; z-index:1; }
+  .carousel-slide--tall figcaption{ z-index:2; }
+  .carousel-slide .slide-backdrop{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    aspect-ratio:auto;
+    object-fit:cover;
+    filter:blur(22px) brightness(0.4) saturate(1.2);
+    transform:scale(1.25); /* esconde a beirada clara que o desfoque deixa */
+  }
+  .carousel-slide--tall .carousel-placeholder{
+    position:relative;
+    width:100%;
+    height:100%;
+    aspect-ratio:auto;
+  }
+  /* o aparelho ocupa a altura do slide, menos o respiro de cima e a faixa
+     da legenda embaixo; a largura sai da proporção do vídeo */
+  .slide-device{
+    position:absolute;
+    inset:14px 0 50px;
+    z-index:1;
+    display:flex;
+    justify-content:center;
+  }
+  .slide-device .work-phone__device{
+    height:100%;
+    box-sizing:border-box;
+    border-radius:26px;
+  }
+  .slide-device video{
+    width:auto;
+    height:100%;
+    aspect-ratio:390 / 844;
+    border-radius:4px 4px 19px 19px;
+    background:#0B0A09;
   }
