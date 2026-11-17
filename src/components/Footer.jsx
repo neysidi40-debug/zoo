@@ -1,5 +1,5 @@
 import KoalaIcon from './KoalaIcon.jsx';
-import { CIDADE, CNPJ, EMAIL_SUPORTE, NAV, WHATSAPP_URL } from '../data/site.js';
+import { CIDADE, EMAIL_CONTATO, NAV } from '../data/site.js';
 
 export default function Footer() {
   return (
@@ -21,15 +21,11 @@ export default function Footer() {
             </div>
             <div className="foot-col">
               <strong>Contato</strong>
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener">
-                WhatsApp
-              </a>
-              <a href={`mailto:${EMAIL_SUPORTE}`}>{EMAIL_SUPORTE}</a>
+              <a href={`mailto:${EMAIL_CONTATO}`}>{EMAIL_CONTATO}</a>
             </div>
             <div className="foot-col">
               <strong>Base</strong>
               <span>{CIDADE}</span>
-              <span>CNPJ {CNPJ}</span>
             </div>
           </div>
         </div>

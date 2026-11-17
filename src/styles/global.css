@@ -1385,6 +1385,28 @@
     border-bottom:1px solid currentColor;
   }
   .work-tip a:hover{ color:var(--paper); }
+  /* projeto em andamento (inProgress em data/projects.js): o "Ver ao vivo"
+     sai riscado e apagado, com o aviso ao lado */
+  .work-tip .work-tip__live{
+    display:flex;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0;
+  }
+  /* mesma cara do link, mas é só texto: não clica */
+  .work-tip .is-pending{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--orange);
+    text-decoration:line-through;
+    text-decoration-thickness:1.5px;
+    opacity:0.6;
+  }
+  .work-tip__status{
+    font-size:13px;
+    color:var(--paper-dim);
+  }
   @media (prefers-reduced-motion: reduce){
     .work-tip, .work-tip__body{ transition:none; }
   }

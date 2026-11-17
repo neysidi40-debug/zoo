@@ -34,7 +34,9 @@ export const PROJECTS = [
       text: 'Site e cardápio com sacola para uma hamburgueria de Caetés I, em Abreu e Lima (PE). Na home, o hambúrguer se monta conforme você rola. Tem um montador de combo, tema claro e escuro e uma versão própria para o celular.',
       bullets: ['Hambúrguer que se monta na rolagem', 'Sacola, Pix simulado e rastreio', 'Versão própria para celular'],
       stack: 'React · Vite · Tailwind CSS · Motion · GSAP',
-      href: 'https://combo-lanches.vercel.app/'
+      // ainda não está no ar: o "Ver ao vivo" sai riscado e sem link, com o
+      // aviso ao lado. Quando lançar, troque por href: '<endereço do site>'
+      inProgress: true
     }
   },
   {
@@ -53,35 +55,6 @@ export const PROJECTS = [
     }
   },
   {
-    id: 'garden-brasa',
-    name: 'Garden Brasa',
-    tag: 'LINK NA BIO',
-    ...midia('garden-brasa'),
-    alt: 'Vídeo da página de links do Garden Brasa sendo rolada, com troca de tema',
-    info: {
-      label: 'LINK NA BIO · 2025',
-      text: 'Link na bio do Garden Brasa, restaurante no Itanhangá (RJ). Reúne iFood, redes sociais, WhatsApp e mapa com rota numa página só, com tema claro e escuro. Feita sobre o template LittleLink.',
-      bullets: ['iFood, redes e WhatsApp num lugar só', 'Mapa com botão de rota', 'Tema claro e escuro'],
-      stack: 'HTML · CSS · JavaScript · LittleLink',
-      href: 'https://gardenbrasabio.vercel.app/'
-    }
-  },
-  {
-    id: 'dharlan-world',
-    name: 'dharlan.world',
-    tag: 'SITE PESSOAL',
-    ...midia('dharlan-world'),
-    phone: celular('dharlan-world'),
-    alt: 'Vídeo do site dharlan.world: home com troca de tema, sobre mim, gerador de kaomoji, criador de avatar, wishlist, contato, 2kki, portfólio, arte, terminal com help, sitemap e exit (a boneca em dither atravessa a tela) e o rádio flutuando na home',
-    info: {
-      label: 'SITE PESSOAL · 2026',
-      text: 'Site pessoal e blog do dharlan com estética de web antiga: HTML escrito à mão, ASCII art, galerias, portfólio, página em formato de terminal e vários temas de cor. Tudo sem framework e sem build.',
-      bullets: ['Estética old web feita à mão', 'Página em formato de terminal', 'Vários temas de cor'],
-      stack: 'HTML · CSS · JavaScript · Vercel',
-      href: 'https://www.dharlan.world/'
-    }
-  },
-  {
     id: 'lidera360',
     name: 'Lidera360',
     tag: 'PLATAFORMA',
@@ -97,20 +70,6 @@ export const PROJECTS = [
     }
   },
   {
-    id: '4bit9d',
-    name: '4bit.9d core',
-    tag: 'SITE PESSOAL',
-    ...midia('4bit9d'),
-    alt: 'Vídeo do site 4bit.9d core sendo rolado',
-    info: {
-      label: 'SITE PESSOAL · 2025',
-      text: 'Site pessoal com cara de terminal: tela de boot, texto digitado ao vivo, arte ASCII e braille em preto e branco e painéis tipo "cat about_me.txt" e "ls -la /social" com os links.',
-      bullets: ['Estética de terminal em preto e branco', 'Arte ASCII/braille digitada ao vivo', 'Tela de boot antes do conteúdo'],
-      stack: 'React · TypeScript · Vite · Tailwind CSS',
-      href: 'https://4bit9d.vercel.app/'
-    }
-  },
-  {
     id: 'mitch',
     name: 'mitchdapesada',
     tag: 'LINK NA BIO',
@@ -122,6 +81,20 @@ export const PROJECTS = [
       bullets: ['Contadores das redes logo no topo', 'Cards com imagem para cada canal', 'Botões de compartilhar no rodapé'],
       stack: 'HTML · CSS · JavaScript · Vercel',
       href: 'https://mitchrework.vercel.app/'
+    }
+  },
+  {
+    id: 'garden-brasa',
+    name: 'Garden Brasa',
+    tag: 'LINK NA BIO',
+    ...midia('garden-brasa'),
+    alt: 'Vídeo da página de links do Garden Brasa sendo rolada, com troca de tema',
+    info: {
+      label: 'LINK NA BIO · 2025',
+      text: 'Link na bio do Garden Brasa, restaurante no Itanhangá (RJ). Reúne iFood, redes sociais, WhatsApp e mapa com rota numa página só, com tema claro e escuro. Feita sobre o template LittleLink.',
+      bullets: ['iFood, redes e WhatsApp num lugar só', 'Mapa com botão de rota', 'Tema claro e escuro'],
+      stack: 'HTML · CSS · JavaScript · LittleLink',
+      href: 'https://gardenbrasabio.vercel.app/'
     }
   },
   {

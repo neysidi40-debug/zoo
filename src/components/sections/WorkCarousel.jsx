@@ -46,7 +46,7 @@ const Arrow = ({ points }) => (
 
 function Tip({ project }) {
   const { info } = project;
-  const external = info.href.startsWith('http');
+  const external = Boolean(info.href?.startsWith('http'));
   return (
     <>
       <span className="mono">{info.label}</span>
@@ -60,9 +60,18 @@ function Tip({ project }) {
         </ul>
       )}
       {info.stack && <p className="work-tip__stack mono">{info.stack}</p>}
-      <a href={info.href} {...(external ? { target: '_blank', rel: 'noopener' } : {})}>
-        {info.hrefLabel ?? 'Ver ao vivo ↗'}
-      </a>
+      {info.inProgress ? (
+        // projeto em andamento: só o texto riscado, sem link — o site ainda
+        // não está no ar, então fica só o preview em vídeo
+        <p className="work-tip__live">
+          <span className="is-pending">{info.hrefLabel ?? 'Ver ao vivo ↗'}</span>
+          <span className="work-tip__status">(Em andamento)</span>
+        </p>
+      ) : (
+        <a href={info.href} {...(external ? { target: '_blank', rel: 'noopener' } : {})}>
+          {info.hrefLabel ?? 'Ver ao vivo ↗'}
+        </a>
+      )}
     </>
   );
 }

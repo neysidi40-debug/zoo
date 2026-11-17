@@ -1,7 +1,7 @@
 import ShapeWaves from '../ShapeWaves.jsx';
 import { Reveal } from '../Reveal.jsx';
 import { BlurTitle } from '../SectionHead.jsx';
-import { EMAIL_CONTATO, WHATSAPP_QUOTE_URL } from '../../data/site.js';
+import { EMAIL_CONTATO, EMAIL_ORCAMENTO_URL } from '../../data/site.js';
 
 export default function CtaFinal() {
   return (
@@ -13,8 +13,9 @@ export default function CtaFinal() {
           <BlurTitle lines={['Vamos construir', 'o site do seu negócio.']} />
         </h2>
         <Reveal className="side" delay={0.2}>
-          <a className="btn" href={WHATSAPP_QUOTE_URL} target="_blank" rel="noopener">
-            Chamar no WhatsApp
+          {/* abre o app de email da pessoa, já com o assunto preenchido */}
+          <a className="btn" href={EMAIL_ORCAMENTO_URL}>
+            Mande um email
           </a>
           <span className="contact-line">{EMAIL_CONTATO}</span>
         </Reveal>

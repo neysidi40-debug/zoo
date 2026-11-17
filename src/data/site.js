@@ -5,17 +5,15 @@
    trocar num lugar só.
 
    AINDA É PLACEHOLDER (trocar antes de publicar):
-     - WHATSAPP: número fictício
-     - CNPJ: valor fictício
+     - WHATSAPP: número fictício (só no menu mobile)
    ============================================================ */
 
 export const WHATSAPP = '5581900000000';
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP}`;
-export const WHATSAPP_QUOTE_URL = `${WHATSAPP_URL}?text=Ol%C3%A1!%20Quero%20um%20or%C3%A7amento%20de%20site.`;
 
 export const EMAIL_CONTATO = 'zooseusite@gmail.com';
-export const EMAIL_SUPORTE = 'koalasuporte@gmail.com';
-export const CNPJ = '00.000.000/0001-00';
+// botão "Mande um email" do fim da página: abre o app de email com o assunto pronto
+export const EMAIL_ORCAMENTO_URL = `mailto:${EMAIL_CONTATO}?subject=${encodeURIComponent('Orçamento de site')}`;
 export const CIDADE = 'Recife, PE';
 
 /* Links do menu, na ordem em que aparecem. "Time" e "Projetos" saíram

@@ -49,8 +49,7 @@ Os arquivos são os do registro do React Bits, sem alteração — a única exce
 
 ## O que ainda é placeholder (trocar antes de publicar)
 
-- **WhatsApp**: número fictício `5581900000000`, em `src/data/site.js`.
-- **CNPJ**: valor fictício (`00.000.000/0001-00`), em `src/data/site.js`.
+- **WhatsApp**: número fictício `5581900000000`, usado só no menu mobile, em `src/data/site.js`.
 - **Preços**: valores ilustrativos, em `src/components/sections/Pricing.jsx`.
 
 ## Como editar o essencial
