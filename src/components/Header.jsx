@@ -22,7 +22,7 @@ import KoalaIcon from './KoalaIcon.jsx';
 import FluxLines from '../reactbits/FluxLines.jsx';
 import { useHeaderMorph } from '../hooks/useHeaderMorph.js';
 import { useThemeContext } from '../hooks/useTheme.js';
-import { CIDADE, NAV, WHATSAPP_URL } from '../data/site.js';
+import { CIDADE, EMAIL_CONTATO, NAV } from '../data/site.js';
 
 /* qual seção está na faixa do meio da tela — é ela que acende no menu */
 function useActiveSection(ids) {
@@ -225,9 +225,7 @@ export default function Header() {
               Iniciar projeto
             </a>
             <div className="mobile-nav__meta mono">
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener">
-                WHATSAPP ↗
-              </a>
+              <a href={`mailto:${EMAIL_CONTATO}`}>EMAIL ↗</a>
               <span>{CIDADE.toUpperCase()}</span>
             </div>
           </motion.div>

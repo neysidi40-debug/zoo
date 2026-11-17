@@ -1,15 +1,9 @@
 /* ============================================================
    ZOO — dados gerais do site
    ============================================================
-   Tudo que é contato, link de menu e placeholder mora aqui, pra
-   trocar num lugar só.
-
-   AINDA É PLACEHOLDER (trocar antes de publicar):
-     - WHATSAPP: número fictício (só no menu mobile)
+   Tudo que é contato e link de menu mora aqui, pra trocar num lugar
+   só. Por enquanto o contato da Zoo é só por email.
    ============================================================ */
-
-export const WHATSAPP = '5581900000000';
-export const WHATSAPP_URL = `https://wa.me/${WHATSAPP}`;
 
 export const EMAIL_CONTATO = 'zooseusite@gmail.com';
 // botão "Mande um email" do fim da página: abre o app de email com o assunto pronto

@@ -51,7 +51,7 @@ export default function Faq() {
     <section>
       <div className="wrap">
         <SectionHead lines={['Perguntas', 'frequentes']}>
-          O que mais perguntam antes de fechar. Se ficar faltando algo, é só chamar no WhatsApp.
+          O que mais perguntam antes de fechar. Se ficar faltando algo, é só mandar um email.
         </SectionHead>
         <div className="faq-list">
           {FAQ.map((item, index) => (
